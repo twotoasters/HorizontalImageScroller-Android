@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="default_frame_color">#FFFFFF</color>
+    <color name="default_frame_off_color">#80FFFFFF</color>
+    <color name="default_transparent_color">#00000000</color>
+</resources>
