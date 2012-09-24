@@ -1,4 +1,4 @@
-package com.twotoasters.android.horizontalimagescroller;
+package com.twotoasters.android.horizontalimagescroller.io;
 
 
 import java.io.FilterInputStream;

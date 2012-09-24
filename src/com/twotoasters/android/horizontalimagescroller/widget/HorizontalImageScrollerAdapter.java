@@ -1,13 +1,19 @@
-package com.twotoasters.android.horizontalimagescroller;
+package com.twotoasters.android.horizontalimagescroller.widget;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
+
+import com.twotoasters.android.horizontalimagescroller.R;
+import com.twotoasters.android.horizontalimagescroller.R.color;
+import com.twotoasters.android.horizontalimagescroller.R.dimen;
+import com.twotoasters.android.horizontalimagescroller.R.id;
+import com.twotoasters.android.horizontalimagescroller.R.layout;
+import com.twotoasters.android.horizontalimagescroller.image.ImageToLoad;
+import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadDrawableResource;
+import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrl;
+import com.twotoasters.android.horizontalimagescroller.io.ImageCacheManager;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -57,6 +63,7 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 		_frameOffColor = res.getColor(R.color.default_frame_off_color);
 		_transparentColor = res.getColor(R.color.default_transparent_color);
 		_imageLayoutResourceId = R.layout.horizontal_image_scroller_item;
+		_imageCacheManager = ImageCacheManager.getInstance(context);
 	}
 
 	public int getImageSize() {
@@ -155,30 +162,10 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 			imageView.setLayoutParams(params);
 			View frame = view.findViewById(_getImageFrameIdInLayout());
 			if (imageToLoad instanceof ImageToLoadUrl) {
-				imageView.setImageResource(_loadingImageResourceId);
-				_imageCacheManager.pleaseCacheDrawable((ImageToLoadUrl) imageToLoad);
+				_imageCacheManager.bindDrawable((ImageToLoadUrl) imageToLoad);
 			} else if (imageToLoad instanceof ImageToLoadDrawableResource) {
 				imageView.setImageDrawable(_context.getResources().getDrawable(((ImageToLoadDrawableResource) imageToLoad).getDrawableResourceId())); 
-			} else if (imageToLoad instanceof ImageToLoadAsset) {
-				InputStream is = null;
-				try {
-					is = _inflater.getContext().getAssets().open(((ImageToLoadAsset) imageToLoad).getPath());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				Bitmap bitmap = null;
-				try {
-					bitmap = BitmapFactory.decodeStream(is);
-					imageView.setImageBitmap(bitmap);
-				} finally {
-			        try {
-			            is.close();
-			            is = null;
-			        } catch (IOException e) {
-			        }
-			    }
-			} 
+			}
 			if(!_showImageFrame) {
 				frame.setBackgroundColor(_transparentColor);
 			}

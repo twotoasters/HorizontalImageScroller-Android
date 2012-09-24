@@ -1,20 +1,37 @@
-package com.twotoasters.android.horizontalimagescroller;
+package com.twotoasters.android.horizontalimagescroller.image;
 
 import com.google.common.base.Strings;
-
+import com.twotoasters.android.horizontalimagescroller.listener.OnImageLoadedListener;
 
 public class ImageToLoadUrl extends ImageToLoad {
 	private String _url;
-	private String _username;
-	private String _password;
-	private boolean _priority;
-	private boolean _canCacheFile;
-	private OnImageLoadedListener _onImageLoadedListener;
+	private String _username = "";
+	private String _password = "";
+	protected boolean _priority = false;
+	protected boolean _canCacheFile = false;
+	protected OnImageLoadedListener _onImageLoadedListener;
+	
+	protected ImageToLoadUrlCacheKey _cacheKey;
+
+	public ImageToLoadUrl(String url) {
+		_url = url;
+	}
+
+	public ImageToLoadUrl(String url, String username, String password) {
+		_url = url;
+		_username = Strings.isNullOrEmpty(username) ? "" : username;
+		_password = Strings.isNullOrEmpty(password) ? "" : password;
+	}
+
+	public ImageToLoadUrl(String url, OnImageLoadedListener onImageLoadedListener) {
+		_url = url;
+		_onImageLoadedListener = onImageLoadedListener;
+	}
 
 	public ImageToLoadUrl(String url, String username, String password, OnImageLoadedListener onImageLoadedListener) {
 		_url = url;
-		_username = Strings.isNullOrEmpty(username) ? null : username;
-		_password = Strings.isNullOrEmpty(password) ? null : password;
+		setUsername(username);
+		setPassword(password);
 		_onImageLoadedListener = onImageLoadedListener;
 	}
 
@@ -31,7 +48,7 @@ public class ImageToLoadUrl extends ImageToLoad {
 	}
 
 	public void setUsername(String username) {
-		_username = username;
+		_username = Strings.isNullOrEmpty(username) ? "" : username;
 	}
 
 	public String getPassword() {
@@ -39,7 +56,7 @@ public class ImageToLoadUrl extends ImageToLoad {
 	}
 
 	public void setPassword(String password) {
-		_password = password;
+		_password = Strings.isNullOrEmpty(password) ? "" : password;
 	}
 
 	public boolean isPriority() {
@@ -49,7 +66,7 @@ public class ImageToLoadUrl extends ImageToLoad {
 	public void setPriority(boolean priority) {
 		_priority = priority;
 	}
-	
+
 	public boolean isCanCacheFile() {
 		return _canCacheFile;
 	}
@@ -59,7 +76,10 @@ public class ImageToLoadUrl extends ImageToLoad {
 	}
 
 	public ImageToLoadUrlCacheKey toCacheKey() {
-		return new ImageToLoadUrlCacheKey(_url, _username, _password);
+		if (_cacheKey == null) {
+			_cacheKey = new ImageToLoadUrlCacheKey(_url, _username, _password);
+		}
+		return _cacheKey;
 	}
 
 	public OnImageLoadedListener getOnImageLoadedListener() {

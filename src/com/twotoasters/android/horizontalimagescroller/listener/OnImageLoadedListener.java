@@ -1,4 +1,4 @@
-package com.twotoasters.android.horizontalimagescroller;
+package com.twotoasters.android.horizontalimagescroller.listener;
 
 public interface OnImageLoadedListener {
 	public void onImageLoaded(String imageUrl);

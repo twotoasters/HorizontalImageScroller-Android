@@ -1,7 +1,9 @@
-package com.twotoasters.android.horizontalimagescroller;
+package com.twotoasters.android.horizontalimagescroller.io;
 
 import java.lang.ref.SoftReference;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrlCacheKey;
 
 import android.graphics.Bitmap;
 

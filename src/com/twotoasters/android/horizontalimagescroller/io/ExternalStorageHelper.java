@@ -1,4 +1,4 @@
-package com.twotoasters.android.horizontalimagescroller;
+package com.twotoasters.android.horizontalimagescroller.io;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+
+import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrlCacheKey;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

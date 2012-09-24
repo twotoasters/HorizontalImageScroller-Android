@@ -25,7 +25,7 @@
  *
  */
 
-package com.twotoasters.android.horizontalimagescroller;
+package com.twotoasters.android.horizontalimagescroller.widget;
 
 import java.util.HashMap;
 import java.util.LinkedList;

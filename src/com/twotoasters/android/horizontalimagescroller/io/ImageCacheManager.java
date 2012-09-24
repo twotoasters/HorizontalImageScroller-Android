@@ -1,4 +1,4 @@
-package com.twotoasters.android.horizontalimagescroller;
+package com.twotoasters.android.horizontalimagescroller.io;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -31,6 +31,10 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.google.common.base.Preconditions;
+import com.twotoasters.android.horizontalimagescroller.image.ImageToLoad;
+import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrl;
+import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrlCacheKey;
+import com.twotoasters.android.horizontalimagescroller.listener.OnImageLoadedListener;
 
 public class ImageCacheManager {
 
@@ -72,7 +76,7 @@ public class ImageCacheManager {
 		synchronized (imageQueue.imagesToLoad) {
 			List<ImageToLoad> toRemove = new ArrayList<ImageToLoad>();
 			for(ImageToLoad loader : imageQueue.imagesToLoad) {
-				if(loader.imageView == imageView) {
+				if(loader.getImageView() == imageView) {
 					toRemove.add(loader);
 				}
 			}
@@ -374,7 +378,6 @@ public class ImageCacheManager {
 				is = fetch(imageToLoadUrl);
 				if(imageToLoadUrl.isCanCacheFile()) {
 					putBitmapToCaches(is, imageToLoadUrl);
-					// Log.v(TAG, "fetchBitmap - getting bitmap from cache");
 					bitmap = memoryCache.get(imageToLoadUrl.toCacheKey());
 					getBitmapFromCache(imageToLoadUrl);
 				} else {
@@ -382,6 +385,7 @@ public class ImageCacheManager {
 				}
 			} catch (Exception e) {
 				Log.v(TAG, "fetchDrawable - Exception: " + imageToLoadUrl.toCacheKey().toString());
+				Log.v(TAG, e.getMessage());
 				e.printStackTrace();
 			}
 
