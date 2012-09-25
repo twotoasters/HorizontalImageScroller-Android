@@ -1,0 +1,14 @@
+<resources>
+
+    <string name="app_name">Horizontal Image Scroller Sample</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">Horizontal Image Scroller Sample</string>
+    
+    <string name="androids">Android Toasters</string>
+    <string name="iosses">iOS Toasters</string>
+    <string name="bizdevs">Biz Dev Toasters</string>
+    <string name="pms">PM Toasters</string>
+    <string name="designers">Designer Toasters</string>
+    
+</resources>

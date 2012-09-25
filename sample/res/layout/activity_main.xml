@@ -1,0 +1,67 @@
+<com.twotoasters.android.horizontalimagescroller.widget.VerticalScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <LinearLayout style="@style/RowOfToasters" >
+
+            <TextView
+                style="@style/ToasterLabel"
+                android:text="@string/androids" />
+
+            <com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScroller
+                android:id="@+id/scroller_androids"
+                style="@style/ToasterHorizontalImageScroller" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/RowOfToasters" >
+
+            <TextView
+                style="@style/ToasterLabel"
+                android:text="@string/iosses" />
+
+            <com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScroller
+                android:id="@+id/scroller_ioesses"
+                style="@style/ToasterHorizontalImageScroller" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/RowOfToasters" >
+
+            <TextView
+                style="@style/ToasterLabel"
+                android:text="@string/bizdevs" />
+
+            <com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScroller
+                android:id="@+id/scroller_bizdevs"
+                style="@style/ToasterHorizontalImageScroller" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/RowOfToasters" >
+
+            <TextView
+                style="@style/ToasterLabel"
+                android:text="@string/pms" />
+
+            <com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScroller
+                android:id="@+id/scroller_pms"
+                style="@style/ToasterHorizontalImageScroller" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/RowOfToasters" >
+
+            <TextView
+                style="@style/ToasterLabel"
+                android:text="@string/designers" />
+
+            <com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScroller
+                android:id="@+id/scroller_designers"
+                style="@style/ToasterHorizontalImageScroller" />
+        </LinearLayout>
+    </LinearLayout>
+
+</com.twotoasters.android.horizontalimagescroller.widget.VerticalScrollView>
