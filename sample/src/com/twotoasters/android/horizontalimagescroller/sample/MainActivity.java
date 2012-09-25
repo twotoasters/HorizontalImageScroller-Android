@@ -73,6 +73,15 @@ public class MainActivity extends Activity {
 		designerToasters.add(toasters.ADIT);
 		designerToasters.add(toasters.DUSTIN);
 		_setupToasterScroller(designerToasters, R.id.scroller_designers, onItemClickListener);
+		
+		// all toasters
+		ArrayList<ImageToLoad> allToasters = new ArrayList<ImageToLoad>();
+		allToasters.addAll(androidToasters);
+		allToasters.addAll(iosToasters);
+		allToasters.addAll(bizDevToasters);
+		allToasters.addAll(pmToasters);
+		allToasters.addAll(designerToasters);
+		_setupToasterScroller(allToasters, R.id.scroller_all_toasters, onItemClickListener);
 	}
 
 	private void _setupToasterScroller(ArrayList<ImageToLoad> imagesToLoad, int scrollerResourceId, OnItemClickListener onItemClickListener) {

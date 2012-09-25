@@ -10,5 +10,6 @@
     <string name="bizdevs">Biz Dev Toasters</string>
     <string name="pms">PM Toasters</string>
     <string name="designers">Designer Toasters</string>
+    <string name="all_toasters">All Toasters</string>
     
 </resources>

@@ -62,6 +62,17 @@
                 android:id="@+id/scroller_designers"
                 style="@style/ToasterHorizontalImageScroller" />
         </LinearLayout>
+        
+        <LinearLayout style="@style/RowOfToasters" >
+
+            <TextView
+                style="@style/ToasterLabel"
+                android:text="@string/all_toasters" />
+
+            <com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScroller
+                android:id="@+id/scroller_all_toasters"
+                style="@style/ToasterHorizontalImageScroller" />
+        </LinearLayout>
     </LinearLayout>
 
 </com.twotoasters.android.horizontalimagescroller.widget.VerticalScrollView>
