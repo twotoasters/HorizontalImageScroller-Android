@@ -130,11 +130,11 @@ public class MainActivity extends Activity {
 
 	private class ToasterToLoadUrl extends ImageToLoadUrl implements ToasterToLoad {
 		private String _name;
-		protected boolean _canCacheFile = true;
 
 		public ToasterToLoadUrl(String url, String name) {
 			super(url);
 			_name = name;
+			_canCacheFile = true;
 		}
 
 		public String getName() {
