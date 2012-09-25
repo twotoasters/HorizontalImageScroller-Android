@@ -143,11 +143,7 @@ public class ImageCacheManager {
 		imageView.setImageBitmap(memoryCache.get(id));
 	}
 	
-	private boolean isCached(ImageToLoadUrl imageToLoadUrl) {
-		return isCached(imageToLoadUrl.toCacheKey());
-	}
-	
-	private boolean isCached(ImageToLoadUrlCacheKey key) {
+	public boolean isCached(ImageToLoadUrlCacheKey key) {
 		try {
 			return openImageFileByUrl(key).exists();
 		} catch (FileNotFoundException e) {

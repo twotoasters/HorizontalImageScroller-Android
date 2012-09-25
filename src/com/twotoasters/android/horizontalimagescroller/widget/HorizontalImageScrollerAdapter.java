@@ -2,16 +2,6 @@ package com.twotoasters.android.horizontalimagescroller.widget;
 
 import java.util.List;
 
-import com.twotoasters.android.horizontalimagescroller.R;
-import com.twotoasters.android.horizontalimagescroller.R.color;
-import com.twotoasters.android.horizontalimagescroller.R.dimen;
-import com.twotoasters.android.horizontalimagescroller.R.id;
-import com.twotoasters.android.horizontalimagescroller.R.layout;
-import com.twotoasters.android.horizontalimagescroller.image.ImageToLoad;
-import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadDrawableResource;
-import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrl;
-import com.twotoasters.android.horizontalimagescroller.io.ImageCacheManager;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.view.LayoutInflater;
@@ -21,6 +11,12 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+
+import com.twotoasters.android.horizontalimagescroller.R;
+import com.twotoasters.android.horizontalimagescroller.image.ImageToLoad;
+import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadDrawableResource;
+import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrl;
+import com.twotoasters.android.horizontalimagescroller.io.ImageCacheManager;
 
 public class HorizontalImageScrollerAdapter extends BaseAdapter {
 	protected Context _context;
@@ -162,7 +158,11 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 			imageView.setLayoutParams(params);
 			View frame = view.findViewById(_getImageFrameIdInLayout());
 			if (imageToLoad instanceof ImageToLoadUrl) {
-				_imageCacheManager.bindDrawable((ImageToLoadUrl) imageToLoad);
+				ImageToLoadUrl imageToLoadUrl = (ImageToLoadUrl) imageToLoad;
+				if (_imageCacheManager.isCached(imageToLoadUrl.toCacheKey()) == false) {
+					imageView.setImageResource(_loadingImageResourceId);
+				}
+				_imageCacheManager.bindDrawable(imageToLoadUrl);
 			} else if (imageToLoad instanceof ImageToLoadDrawableResource) {
 				imageView.setImageDrawable(_context.getResources().getDrawable(((ImageToLoadDrawableResource) imageToLoad).getDrawableResourceId())); 
 			}

@@ -3,14 +3,14 @@ package com.twotoasters.android.horizontalimagescroller.image;
 import android.widget.ImageView;
 
 public abstract class ImageToLoad {
-	protected ImageView imageView;
+	protected ImageView _imageView;
 
 	public ImageView getImageView() {
-		return imageView;
+		return _imageView;
 	}
 
 	public void setImageView(ImageView imageView) {
-		this.imageView = imageView;
+		_imageView = imageView;
 	}
 	
 }

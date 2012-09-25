@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoad;
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadDrawableResource;
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrl;
+import com.twotoasters.android.horizontalimagescroller.listener.OnImageLoadedListener;
 import com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScroller;
 import com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScrollerAdapter;
 
@@ -33,7 +34,7 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				ToasterToLoad toaster = (ToasterToLoad) ((HorizontalImageScroller) parent).getAdapter().getItem(position);
+				ToasterToLoad toaster = (ToasterToLoad)((HorizontalImageScroller)parent).getAdapter().getItem(position);
 				Toast.makeText(MainActivity.this, toaster.getName(), Toast.LENGTH_SHORT).show();
 			}
 		};
@@ -73,7 +74,7 @@ public class MainActivity extends Activity {
 		designerToasters.add(toasters.ADIT);
 		designerToasters.add(toasters.DUSTIN);
 		_setupToasterScroller(designerToasters, R.id.scroller_designers, onItemClickListener);
-		
+
 		// all toasters
 		ArrayList<ImageToLoad> allToasters = new ArrayList<ImageToLoad>();
 		allToasters.addAll(androidToasters);
@@ -86,17 +87,20 @@ public class MainActivity extends Activity {
 
 	private void _setupToasterScroller(ArrayList<ImageToLoad> imagesToLoad, int scrollerResourceId, OnItemClickListener onItemClickListener) {
 		HorizontalImageScroller scroller = (HorizontalImageScroller)findViewById(scrollerResourceId);
-		scroller.setAdapter(new HorizontalImageScrollerAdapter(MainActivity.this, imagesToLoad));
+		HorizontalImageScrollerAdapter adapter = new HorizontalImageScrollerAdapter(MainActivity.this, imagesToLoad);
+		adapter.setLoadingImageResourceId(R.drawable.generic_toaster);
+		scroller.setAdapter(adapter);
 		scroller.setOnItemClickListener(onItemClickListener);
 		_horizontalImageScrollers.add(scroller);
 	}
 
 	private String getGravatarUrl(String hash) {
 		StringBuilder builder = new StringBuilder("http://www.gravatar.com/avatar/");
-		builder.append(hash);
-		builder.append(".jpg?size=200");
-		String url = builder.toString();
-		return url;
+		builder.append(hash)
+			.append(".jpg?size=200")
+			.append("&rating=g")
+			.append("&default=404");
+		return builder.toString();
 	}
 
 	@Override
@@ -135,6 +139,18 @@ public class MainActivity extends Activity {
 			super(url);
 			_name = name;
 			_canCacheFile = true;
+			_onImageLoadedListener = new OnImageLoadedListener() {
+				
+				@Override
+				public void onLoadFailure(String imageUrl) {
+					_imageView.setImageResource(R.drawable.generic_toaster);
+				}
+				
+				@Override
+				public void onImageLoaded(String imageUrl) {
+					// no-op
+				}
+			};
 		}
 
 		public String getName() {
