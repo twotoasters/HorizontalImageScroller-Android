@@ -1,5 +1,6 @@
 package com.twotoasters.android.horizontalimagescroller.widget;
 
+import java.util.HashMap;
 import java.util.List;
 
 import android.content.Context;
@@ -13,10 +14,12 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.twotoasters.android.horizontalimagescroller.R;
+import com.twotoasters.android.horizontalimagescroller.image.BitmapHelper;
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoad;
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadDrawableResource;
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrl;
 import com.twotoasters.android.horizontalimagescroller.io.ImageCacheManager;
+import com.twotoasters.android.horizontalimagescroller.io.ImageUrlRequest;
 
 public class HorizontalImageScrollerAdapter extends BaseAdapter {
 	protected Context _context;
@@ -33,6 +36,7 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 	protected ImageCacheManager _imageCacheManager;
 	protected OnClickListener _imageOnClickListener;
 	protected List<ImageToLoad> _images;
+	protected HashMap<Integer, ImageUrlRequest> _imageUrlRequests;
 
 	public HorizontalImageScrollerAdapter(final Context context, final List<ImageToLoad> images, final int imageSize, final int frameColorResourceId, final int frameOffColorResourceId,
 			final int transparentColorResourceId, final int imageLayoutResourceId, final int loadingImageResourceId) {
@@ -160,12 +164,23 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 			View frame = view.findViewById(_getImageFrameIdInLayout());
 			if (imageToLoad instanceof ImageToLoadUrl) {
 				ImageToLoadUrl imageToLoadUrl = (ImageToLoadUrl) imageToLoad;
-				if (_imageCacheManager.isCached(imageToLoadUrl.toCacheKey()) == false) {
-					imageView.setImageResource(_loadingImageResourceId);
+				if (_imageUrlRequests == null) {
+					_imageUrlRequests = new HashMap<Integer, ImageUrlRequest>();
 				}
-				_imageCacheManager.bindDrawable(imageToLoadUrl);
+				ImageUrlRequest imageUrlRequest;
+				if (_imageUrlRequests.containsKey(position)) {
+					imageUrlRequest = _imageUrlRequests.get(position);
+				} else {
+					imageUrlRequest = new ImageUrlRequest(imageToLoadUrl, _imageSize, _imageSize);
+				}
+				if (_imageCacheManager.isCached(imageToLoadUrl.toCacheKey()) == false) {
+					// TODO: conditionally leverage improved resource handling in android 3.0+
+					imageView.setImageBitmap(BitmapHelper.decodeSampledBitmapFromResource(_context.getResources(), _loadingImageResourceId, _imageSize, _imageSize));
+				}
+				_imageCacheManager.bindDrawable(imageUrlRequest);
 			} else if (imageToLoad instanceof ImageToLoadDrawableResource) {
-				imageView.setImageDrawable(_context.getResources().getDrawable(((ImageToLoadDrawableResource) imageToLoad).getDrawableResourceId())); 
+				// TODO: conditionally leverage improved resource handling in android 3.0+
+				imageView.setImageBitmap(BitmapHelper.decodeSampledBitmapFromResource(_context.getResources(), ((ImageToLoadDrawableResource) imageToLoad).getDrawableResourceId(), _imageSize, _imageSize)); 
 			}
 			if(!_showImageFrame) {
 				frame.setBackgroundColor(_transparentColor);
@@ -194,9 +209,11 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 			ImageCacheManager icm = ImageCacheManager.getInstance(_context);
 			for (ImageToLoad image : _images) {
 				if (image instanceof ImageToLoadUrl) {
-					icm.unbindImage(((ImageToLoadUrl) image).getImageView()); 
+					icm.unbindImage(((ImageToLoadUrl) image).getImageView());
 				}
 			}
 		}
 	}
+	
+	
 }

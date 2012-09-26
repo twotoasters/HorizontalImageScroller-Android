@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -21,6 +22,7 @@ public class MainActivity extends Activity {
 
 	private List<HorizontalImageScroller> _horizontalImageScrollers;
 	private static final String KEY_SCROLL_XES = "scrollXes";
+	private static final String TAG = MainActivity.class.getSimpleName();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -98,6 +100,7 @@ public class MainActivity extends Activity {
 		HorizontalImageScroller scroller = (HorizontalImageScroller)findViewById(scrollerResourceId);
 		HorizontalImageScrollerAdapter adapter = new HorizontalImageScrollerAdapter(MainActivity.this, imagesToLoad);
 		adapter.setLoadingImageResourceId(R.drawable.generic_toaster);
+		adapter.setImageSize((int) getResources().getDimension(R.dimen.image_size));
 		scroller.setAdapter(adapter);
 		scroller.setOnItemClickListener(onItemClickListener);
 		_horizontalImageScrollers.add(scroller);
@@ -152,12 +155,13 @@ public class MainActivity extends Activity {
 				
 				@Override
 				public void onLoadFailure(String imageUrl) {
+					Log.v(TAG, "failed: " + imageUrl);
 					_imageView.setImageResource(R.drawable.generic_toaster);
 				}
 				
 				@Override
 				public void onImageLoaded(String imageUrl) {
-					// no-op
+					Log.v(TAG, "loaded: " + imageUrl);
 				}
 			};
 		}

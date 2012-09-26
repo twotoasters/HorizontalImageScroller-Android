@@ -26,12 +26,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.google.common.base.Preconditions;
-import com.twotoasters.android.horizontalimagescroller.image.ImageToLoad;
+import com.twotoasters.android.horizontalimagescroller.image.BitmapHelper;
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrl;
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrlCacheKey;
 import com.twotoasters.android.horizontalimagescroller.listener.OnImageLoadedListener;
@@ -74,14 +73,14 @@ public class ImageCacheManager {
 		}
 
 		synchronized (imageQueue.imagesToLoad) {
-			List<ImageToLoad> toRemove = new ArrayList<ImageToLoad>();
-			for(ImageToLoad loader : imageQueue.imagesToLoad) {
-				if(loader.getImageView() == imageView) {
+			List<ImageUrlRequest> toRemove = new ArrayList<ImageUrlRequest>();
+			for(ImageUrlRequest loader : imageQueue.imagesToLoad) {
+				if(loader.getImageToLoadUrl().getImageView() == imageView) {
 					toRemove.add(loader);
 				}
 			}
 
-			for(ImageToLoad remove : toRemove) {
+			for(ImageUrlRequest remove : toRemove) {
 				imageQueue.imagesToLoad.remove(remove);
 			}
 		}
@@ -89,20 +88,20 @@ public class ImageCacheManager {
 
 	public void unbindListener(OnImageLoadedListener listener) {
 		synchronized (imageQueue.imagesToLoad) {
-			List<ImageToLoadUrl> toRemove = new ArrayList<ImageToLoadUrl>();
-			for(ImageToLoadUrl loader : imageQueue.imagesToLoad) {
-				if(loader.getOnImageLoadedListener() == listener) {
+			List<ImageUrlRequest> toRemove = new ArrayList<ImageUrlRequest>();
+			for(ImageUrlRequest loader : imageQueue.imagesToLoad) {
+				if(loader.getImageToLoadUrl().getOnImageLoadedListener() == listener) {
 					toRemove.add(loader);
 				}
 			}
 
-			for(ImageToLoad remove : toRemove) {
+			for(ImageUrlRequest remove : toRemove) {
 				imageQueue.imagesToLoad.remove(remove);
 			}
 		}
 	}
 	
-	public boolean bindDrawable(ImageToLoadUrl imageToLoadUrl) {
+	public boolean bindDrawable(ImageUrlRequest imageUrlRequest) {
 		// BJD - clear out any previous instances of this ImageView so that we
 		// don't get the
 		// wrong image showing up in cases where we request an image, scroll an
@@ -110,6 +109,7 @@ public class ImageCacheManager {
 		// up so the ImageView gets recycled and show a cached image, then have
 		// the network
 		// loaded version pop in later.
+		ImageToLoadUrl imageToLoadUrl = imageUrlRequest.getImageToLoadUrl();
 		imageViews.remove(imageToLoadUrl.getImageView()); // deluxe
 		OnImageLoadedListener onImageLoadedListener = imageToLoadUrl.getOnImageLoadedListener();
 		ImageToLoadUrlCacheKey key = imageToLoadUrl.toCacheKey();
@@ -120,7 +120,7 @@ public class ImageCacheManager {
 			}
 			return false;
 		} else if(isCached(key)) {
-			Bitmap bm = getBitmapFromFileCache(key);
+			Bitmap bm = getBitmapFromFileCache(imageUrlRequest);
 			if(bm != null) {
 				imageToLoadUrl.getImageView().setImageBitmap(bm);
 				if(onImageLoadedListener != null) {
@@ -131,7 +131,7 @@ public class ImageCacheManager {
 		}
 
 		imageViews.put(imageToLoadUrl.getImageView(), key);
-		fetchAndBind(imageToLoadUrl);
+		fetchAndBind(imageUrlRequest);
 		return true;
 	}
 
@@ -165,40 +165,32 @@ public class ImageCacheManager {
 		throw new FileNotFoundException();
 	}
 	
-	private Bitmap getBitmapFromCache(ImageToLoadUrl imageToLoadUrl) {
-		return getBitmapFromCache(imageToLoadUrl.toCacheKey());
-	}
-
-	private Bitmap getBitmapFromCache(ImageToLoadUrlCacheKey key) {
-		Bitmap bitmap = memoryCache.get(key);
+	private Bitmap getBitmapFromCache(ImageUrlRequest imageUrlRequest) {
+		Bitmap bitmap = memoryCache.get(imageUrlRequest.getImageToLoadUrl().toCacheKey());
 		if(bitmap == null) {
-			bitmap = getBitmapFromFileCache(key);
+			bitmap = getBitmapFromFileCache(imageUrlRequest);
 		}
 		return bitmap;
 	}
 	
-	private Bitmap getBitmapFromFileCache(ImageToLoadUrl imageToLoadUrl) {
-		return getBitmapFromFileCache(imageToLoadUrl.toCacheKey());
-	}
-
-	private Bitmap getBitmapFromFileCache(ImageToLoadUrlCacheKey key) {
+	private Bitmap getBitmapFromFileCache(ImageUrlRequest imageUrlRequest) {
 		Bitmap bitmap = null;
 		try {
-			File f = openImageFileByUrl(key);
-			bitmap = decodeBitmap(f.getAbsolutePath());
+			File f = openImageFileByUrl(imageUrlRequest.getImageToLoadUrl().toCacheKey());
+			bitmap = decodeBitmap(f.getAbsolutePath(), imageUrlRequest.getReqWidth(), imageUrlRequest.getReqHeight());
 		} catch (FileNotFoundException e) {
 		}
 		return bitmap;
 	}
 
-	private Bitmap decodeBitmap(String filePath) throws FileNotFoundException {
-		return decodeBitmap(new FileInputStream(filePath));
+	private Bitmap decodeBitmap(String filePath, int reqWidth, int reqHeight) throws FileNotFoundException {
+		return decodeBitmap(new FileInputStream(filePath), reqWidth, reqHeight);
 	}
 
-	private Bitmap decodeBitmap(InputStream is) {
+	private Bitmap decodeBitmap(InputStream is, int reqWidth, int reqHeight) {
 		Bitmap bitmap = null;
 		try {
-			bitmap = BitmapFactory.decodeStream(new FlushedInputStream(is));
+			bitmap = BitmapHelper.decodeSampledBitmapFromSteam(new FlushedInputStream(is), reqWidth, reqHeight); 
 		} catch (OutOfMemoryError e) {
 			Log.w(TAG, "Out of memory while decoding bitmap stream");
 			System.gc();
@@ -206,13 +198,13 @@ public class ImageCacheManager {
 		return bitmap;
 	}
 
-	private void fetchAndBind(final ImageToLoadUrl imageToLoadUrl) {
-		imageQueue.clean(imageToLoadUrl.getImageView());
+	private void fetchAndBind(final ImageUrlRequest imageUrlRequest) {
+		imageQueue.clean(imageUrlRequest.getImageToLoadUrl().getImageView());
 		synchronized (imageQueue.imagesToLoad) {
-			if(imageToLoadUrl.isPriority()) {
-				imageQueue.imagesToLoad.add(imageToLoadUrl);
+			if(imageUrlRequest.getImageToLoadUrl().isPriority()) {
+				imageQueue.imagesToLoad.add(imageUrlRequest);
 			} else {
-				imageQueue.imagesToLoad.add(0, imageToLoadUrl);
+				imageQueue.imagesToLoad.add(0, imageUrlRequest);
 			}
 			imageQueue.imagesToLoad.notifyAll();
 		}
@@ -224,23 +216,24 @@ public class ImageCacheManager {
 		}
 	}
 
-	public void pleaseCacheDrawable(final ImageToLoadUrl imageToLoadUrl) {
-		if(!isCached(imageToLoadUrl.toCacheKey())) {
-			fetchAndCache(imageToLoadUrl);
+	public void pleaseCacheDrawable(final ImageUrlRequest imageUrlRequest) {
+		if(!isCached(imageUrlRequest.getImageToLoadUrl().toCacheKey())) {
+			fetchAndCache(imageUrlRequest);
 		}
 	}
 
-	protected void fetchAndCache(ImageToLoadUrl imageToLoadUrl) {
+	protected void fetchAndCache(ImageUrlRequest imageUrlRequest) {
 		try {
-			InputStream is = fetch(imageToLoadUrl);
-			putBitmapToCaches(is, imageToLoadUrl);
+			InputStream is = fetch(imageUrlRequest);
+			putBitmapToCaches(is, imageUrlRequest);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	protected InputStream fetch(ImageToLoadUrl imageToLoadUrl) throws MalformedURLException, IOException {
+	protected InputStream fetch(ImageUrlRequest imageUrlRequest) throws MalformedURLException, IOException {
 		DefaultHttpClient httpClient = new DefaultHttpClient();
+		ImageToLoadUrl imageToLoadUrl = imageUrlRequest.getImageToLoadUrl(); 
 		httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY,
 				new UsernamePasswordCredentials(imageToLoadUrl.getUsername(), imageToLoadUrl.getPassword()));
 		HttpResponse response = httpClient.execute(new HttpGet(imageToLoadUrl.getUrl()));
@@ -253,19 +246,19 @@ public class ImageCacheManager {
 		return entity.getContent();
 	}
 
-	private void putBitmapToCaches(InputStream is, ImageToLoadUrl imageToLoadUrl) throws IOException {
+	private void putBitmapToCaches(InputStream is, ImageUrlRequest imageUrlRequest) throws IOException {
 		FlushedInputStream fis = new FlushedInputStream(is);
 		Bitmap bitmap = null;
 		try {
-			bitmap = BitmapFactory.decodeStream(fis);
-			memoryCache.put(imageToLoadUrl.toCacheKey(), bitmap);
+			bitmap = BitmapHelper.decodeSampledBitmapFromSteam(fis, imageUrlRequest.getReqWidth(), imageUrlRequest.getReqHeight());
+			memoryCache.put(imageUrlRequest.getImageToLoadUrl().toCacheKey(), bitmap);
 		} catch (OutOfMemoryError e) {
 			Log.v(TAG, "writeToExternalStorage - Out of memory");
 			System.gc();
 		}
 
 		if(bitmap != null) {
-			String filename = ExternalStorageHelper.UrlToFilename(imageToLoadUrl.toCacheKey());
+			String filename = ExternalStorageHelper.UrlToFilename(imageUrlRequest.getImageToLoadUrl().toCacheKey());
 			createFileIfNonexistent(filename);
 			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(openImageFile(filename)), 65535);
 			bitmap.compress(Bitmap.CompressFormat.PNG, 0, bos);
@@ -295,7 +288,7 @@ public class ImageCacheManager {
 	}
 
 	class ImagesQueue {
-		private Vector<ImageToLoadUrl> imagesToLoad = new Vector<ImageToLoadUrl>();
+		private Vector<ImageUrlRequest> imagesToLoad = new Vector<ImageUrlRequest>();
 
 		public void clean(ImageView imageView) {
 			// must synchronize over the vector, else someone else could be
@@ -303,7 +296,7 @@ public class ImageCacheManager {
 			// exception
 			synchronized (imagesToLoad) {
 				for(int j = 0; j < imagesToLoad.size();) {
-					if(imagesToLoad.get(j).getImageView() == imageView) {
+					if(imagesToLoad.get(j).getImageToLoadUrl().getImageView() == imageView) {
 						// Log.v(TAG, "Cleaning an queued imageView request");
 						imagesToLoad.remove(j);
 					} else
@@ -325,10 +318,10 @@ public class ImageCacheManager {
 							imageQueue.imagesToLoad.wait();
 						}
 					if(imageQueue.imagesToLoad.size() != 0) {
-						ImageToLoadUrl imageToLoad;
+						ImageUrlRequest imageUrlRequest;
 						synchronized (imageQueue.imagesToLoad) {
 							try {
-								imageToLoad = imageQueue.imagesToLoad.lastElement();
+								imageUrlRequest = imageQueue.imagesToLoad.lastElement();
 								imageQueue.imagesToLoad.remove(imageQueue.imagesToLoad.size() - 1);
 							} catch (Exception e) {
 								continue;
@@ -336,21 +329,21 @@ public class ImageCacheManager {
 						}
 
 						Bitmap bitmap = null;
-						if(isCached(imageToLoad.toCacheKey())) {
-							bitmap = getBitmapFromFileCache(imageToLoad);
+						if(isCached(imageUrlRequest.getImageToLoadUrl().toCacheKey())) {
+							bitmap = getBitmapFromFileCache(imageUrlRequest);
 						}
 
 						if(bitmap == null) {
-							bitmap = fetchBitmap(imageToLoad);
+							bitmap = fetchBitmap(imageUrlRequest);
 						}
 
 						if(bitmap != null) {
-							memoryCache.putIfAbsent(imageToLoad.toCacheKey(), bitmap);
+							memoryCache.putIfAbsent(imageUrlRequest.getImageToLoadUrl().toCacheKey(), bitmap);
 						}
-						ImageToLoadUrlCacheKey key = imageViews.get(imageToLoad.getImageView());
-						if(key != null && key.equals(imageToLoad.toCacheKey())) {
-							ImageViewUpdater updater = new ImageViewUpdater(bitmap, imageToLoad);
-							Activity activity = (Activity)imageToLoad.getImageView().getContext();
+						ImageToLoadUrlCacheKey key = imageViews.get(imageUrlRequest.getImageToLoadUrl().getImageView());
+						if(key != null && key.equals(imageUrlRequest.getImageToLoadUrl().toCacheKey())) {
+							ImageViewUpdater updater = new ImageViewUpdater(bitmap, imageUrlRequest);
+							Activity activity = (Activity)imageUrlRequest.getImageToLoadUrl().getImageView().getContext();
 							if(activity != null) {
 								activity.runOnUiThread(updater);
 							}
@@ -365,22 +358,22 @@ public class ImageCacheManager {
 		}
 	}
 
-	private Bitmap fetchBitmap(ImageToLoadUrl imageToLoadUrl) {
+	private Bitmap fetchBitmap(ImageUrlRequest imageUrlRequest) {
 		Bitmap bitmap = null;
 		InputStream is = null;
 		int retries = MAX_RETRIES;
 		do {
 			try {
-				is = fetch(imageToLoadUrl);
-				if(imageToLoadUrl.isCanCacheFile()) {
-					putBitmapToCaches(is, imageToLoadUrl);
-					bitmap = memoryCache.get(imageToLoadUrl.toCacheKey());
-					getBitmapFromCache(imageToLoadUrl);
+				is = fetch(imageUrlRequest);
+				if(imageUrlRequest.getImageToLoadUrl().isCanCacheFile()) {
+					putBitmapToCaches(is, imageUrlRequest);
+					bitmap = memoryCache.get(imageUrlRequest.getImageToLoadUrl().toCacheKey());
+					getBitmapFromCache(imageUrlRequest);
 				} else {
-					bitmap = decodeBitmap(is);
+					bitmap = decodeBitmap(is, imageUrlRequest.getReqWidth(), imageUrlRequest.getReqHeight());
 				}
 			} catch (Exception e) {
-				Log.v(TAG, "fetchDrawable - Exception: " + imageToLoadUrl.toCacheKey().toString());
+				Log.v(TAG, "fetchDrawable - Exception: " + imageUrlRequest.getImageToLoadUrl().toCacheKey().toString());
 				Log.v(TAG, e.getMessage());
 				e.printStackTrace();
 			}
@@ -399,15 +392,16 @@ public class ImageCacheManager {
 
 	class ImageViewUpdater implements Runnable {
 		Bitmap bitmap;
-		ImageToLoadUrl imageToLoadUrl;
+		ImageUrlRequest imageUrlRequest;
 
-		public ImageViewUpdater(Bitmap bitmap, ImageToLoadUrl imageToLoadUrl) {
+		public ImageViewUpdater(Bitmap bitmap, ImageUrlRequest imageUrlRequest) {
 			this.bitmap = bitmap;
-			this.imageToLoadUrl = imageToLoadUrl;
+			this.imageUrlRequest = imageUrlRequest;
 		}
 
 		@Override
 		public void run() {
+			ImageToLoadUrl imageToLoadUrl = imageUrlRequest.getImageToLoadUrl();
 			if(bitmap != null) {
 				imageToLoadUrl.getImageView().setImageBitmap(bitmap);
 				if(imageToLoadUrl.getOnImageLoadedListener() != null) {
