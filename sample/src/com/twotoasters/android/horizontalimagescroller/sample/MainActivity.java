@@ -20,6 +20,7 @@ import com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScr
 public class MainActivity extends Activity {
 
 	private List<HorizontalImageScroller> _horizontalImageScrollers;
+	private static final String KEY_SCROLL_XES = "scrollXes";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -83,6 +84,14 @@ public class MainActivity extends Activity {
 		allToasters.addAll(pmToasters);
 		allToasters.addAll(designerToasters);
 		_setupToasterScroller(allToasters, R.id.scroller_all_toasters, onItemClickListener);
+
+		if(savedInstanceState != null) {
+			// restore the scroll position of each scroller
+			int[] scrollXes = savedInstanceState.getIntArray(KEY_SCROLL_XES);
+			for(int i = 0; i < scrollXes.length; i++) {
+				_horizontalImageScrollers.get(i).scrollTo(scrollXes[i]);
+			}
+		}
 	}
 
 	private void _setupToasterScroller(ArrayList<ImageToLoad> imagesToLoad, int scrollerResourceId, OnItemClickListener onItemClickListener) {
@@ -169,5 +178,18 @@ public class MainActivity extends Activity {
 		public String getName() {
 			return _name;
 		}
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+
+		// store the scroll position of each scroller
+		// (so they can be restored after device configuration change)
+		int[] scrollXes = new int[_horizontalImageScrollers.size()];
+		for(HorizontalImageScroller scroller : _horizontalImageScrollers) {
+			scrollXes[_horizontalImageScrollers.indexOf(scroller)] = scroller.getCurrentX();
+		}
+		outState.putIntArray(KEY_SCROLL_XES, scrollXes);
 	}
 }

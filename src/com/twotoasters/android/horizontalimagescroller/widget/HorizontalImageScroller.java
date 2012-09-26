@@ -3,7 +3,6 @@ package com.twotoasters.android.horizontalimagescroller.widget;
 
 import java.util.List;
 
-
 import android.content.Context;
 import android.util.AttributeSet;
 
@@ -43,5 +42,9 @@ public class HorizontalImageScroller extends HorizontalListView {
 		for (HorizontalImageScroller scroller : scrollers) {
 			((HorizontalImageScrollerAdapter)scroller.mAdapter).unbindImageViews();
 		}
+	}
+	
+	public int getCurrentX() {
+		return mCurrentX;
 	}
 }
