@@ -150,6 +150,7 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 			}
 			ImageToLoad imageToLoad = getItem(position);
 			ImageView imageView = (ImageView)view.findViewById(_getImageIdInLayout());
+			_imageCacheManager.unbindImage(imageView);
 			imageToLoad.setImageView(imageView);
 			if (_imageOnClickListener != null) imageView.setOnClickListener(_imageOnClickListener);
 			FrameLayout.LayoutParams params = (FrameLayout.LayoutParams)imageView.getLayoutParams();
