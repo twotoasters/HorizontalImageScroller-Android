@@ -1,5 +1,6 @@
 package com.twotoasters.android.horizontalimagescroller.image;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import android.content.res.Resources;
@@ -48,6 +49,11 @@ public class BitmapHelper {
 
 		// Decode bitmap with inSampleSize set
 		options.inJustDecodeBounds = false;
+		try {
+			stream.reset();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return BitmapFactory.decodeStream(stream, null, options);
 	}
 }
