@@ -164,12 +164,10 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 			if (imageToLoad instanceof ImageToLoadUrl) {
 				ImageToLoadUrl imageToLoadUrl = (ImageToLoadUrl) imageToLoad;
 				ImageUrlRequest imageUrlRequest = new ImageUrlRequest(imageToLoadUrl, _imageSize, _imageSize);
-				if (_imageCacheManager.isCached(imageToLoadUrl.toCacheKey()) == false) {
-					_setImageViewWithDrawableResourceId(imageView, (ImageToLoadDrawableResource) imageToLoad);
-				}
+				_setImageViewWithDrawableResourceId(imageView, _loadingImageResourceId);
 				_imageCacheManager.bindDrawable(imageUrlRequest);
 			} else if (imageToLoad instanceof ImageToLoadDrawableResource) {
-				_setImageViewWithDrawableResourceId(imageView, (ImageToLoadDrawableResource) imageToLoad);
+				_setImageViewWithDrawableResourceId(imageView, ((ImageToLoadDrawableResource) imageToLoad).getDrawableResourceId());
 			}
 			if(!_showImageFrame) {
 				frame.setBackgroundColor(_transparentColor);
@@ -178,12 +176,12 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 		return view;
 	}
 	
-	protected void _setImageViewWithDrawableResourceId(ImageView imageView, ImageToLoadDrawableResource imageToLoadDrawableResource) {
+	protected void _setImageViewWithDrawableResourceId(ImageView imageView, int drawableResourceId) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			imageView.setImageDrawable(_context.getResources().getDrawable(imageToLoadDrawableResource.getDrawableResourceId()));
+			imageView.setImageDrawable(_context.getResources().getDrawable(drawableResourceId));
 		} else {
 			// workaround for old versions of android
-			imageView.setImageBitmap(BitmapHelper.decodeSampledBitmapFromResource(_context.getResources(), imageToLoadDrawableResource.getDrawableResourceId(), _imageSize, _imageSize));
+			imageView.setImageBitmap(BitmapHelper.decodeSampledBitmapFromResource(_context.getResources(), drawableResourceId, _imageSize, _imageSize));
 		}
 	}
 
