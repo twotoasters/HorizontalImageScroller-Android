@@ -1,10 +1,10 @@
 package com.twotoasters.android.horizontalimagescroller.widget;
 
-import java.util.HashMap;
 import java.util.List;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,7 +36,6 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 	protected ImageCacheManager _imageCacheManager;
 	protected OnClickListener _imageOnClickListener;
 	protected List<ImageToLoad> _images;
-	protected HashMap<Integer, ImageUrlRequest> _imageUrlRequests;
 
 	public HorizontalImageScrollerAdapter(final Context context, final List<ImageToLoad> images, final int imageSize, final int frameColorResourceId, final int frameOffColorResourceId,
 			final int transparentColorResourceId, final int imageLayoutResourceId, final int loadingImageResourceId) {
@@ -164,29 +163,28 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 			View frame = view.findViewById(_getImageFrameIdInLayout());
 			if (imageToLoad instanceof ImageToLoadUrl) {
 				ImageToLoadUrl imageToLoadUrl = (ImageToLoadUrl) imageToLoad;
-				if (_imageUrlRequests == null) {
-					_imageUrlRequests = new HashMap<Integer, ImageUrlRequest>();
-				}
-				ImageUrlRequest imageUrlRequest;
-				if (_imageUrlRequests.containsKey(position)) {
-					imageUrlRequest = _imageUrlRequests.get(position);
-				} else {
-					imageUrlRequest = new ImageUrlRequest(imageToLoadUrl, _imageSize, _imageSize);
-				}
+				ImageUrlRequest imageUrlRequest = new ImageUrlRequest(imageToLoadUrl, _imageSize, _imageSize);
 				if (_imageCacheManager.isCached(imageToLoadUrl.toCacheKey()) == false) {
-					// TODO: conditionally leverage improved resource handling in android 3.0+
-					imageView.setImageBitmap(BitmapHelper.decodeSampledBitmapFromResource(_context.getResources(), _loadingImageResourceId, _imageSize, _imageSize));
+					_setImageViewWithDrawableResourceId(imageView, (ImageToLoadDrawableResource) imageToLoad);
 				}
 				_imageCacheManager.bindDrawable(imageUrlRequest);
 			} else if (imageToLoad instanceof ImageToLoadDrawableResource) {
-				// TODO: conditionally leverage improved resource handling in android 3.0+
-				imageView.setImageBitmap(BitmapHelper.decodeSampledBitmapFromResource(_context.getResources(), ((ImageToLoadDrawableResource) imageToLoad).getDrawableResourceId(), _imageSize, _imageSize)); 
+				_setImageViewWithDrawableResourceId(imageView, (ImageToLoadDrawableResource) imageToLoad);
 			}
 			if(!_showImageFrame) {
 				frame.setBackgroundColor(_transparentColor);
 			}
 		}
 		return view;
+	}
+	
+	protected void _setImageViewWithDrawableResourceId(ImageView imageView, ImageToLoadDrawableResource imageToLoadDrawableResource) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			imageView.setImageDrawable(_context.getResources().getDrawable(imageToLoadDrawableResource.getDrawableResourceId()));
+		} else {
+			// workaround for old versions of android
+			imageView.setImageBitmap(BitmapHelper.decodeSampledBitmapFromResource(_context.getResources(), imageToLoadDrawableResource.getDrawableResourceId(), _imageSize, _imageSize));
+		}
 	}
 
 	@Override
