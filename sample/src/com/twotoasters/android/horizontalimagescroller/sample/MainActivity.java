@@ -13,7 +13,7 @@ import android.widget.Toast;
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoad;
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadDrawableResource;
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrl;
-import com.twotoasters.android.horizontalimagescroller.listener.OnImageLoadedListener;
+import com.twotoasters.android.horizontalimagescroller.image.OnImageLoadedListener;
 import com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScroller;
 import com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScrollerAdapter;
 
