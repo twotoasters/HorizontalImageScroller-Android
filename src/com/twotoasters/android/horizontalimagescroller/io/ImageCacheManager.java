@@ -32,7 +32,7 @@ import android.widget.ImageView;
 import com.google.common.base.Preconditions;
 import com.twotoasters.android.horizontalimagescroller.image.BitmapHelper;
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrl;
-import com.twotoasters.android.horizontalimagescroller.listener.OnImageLoadedListener;
+import com.twotoasters.android.horizontalimagescroller.image.OnImageLoadedListener;
 
 public class ImageCacheManager {
 
@@ -101,13 +101,10 @@ public class ImageCacheManager {
 	}
 	
 	public boolean bindDrawable(ImageUrlRequest imageUrlRequest) {
-		// BJD - clear out any previous instances of this ImageView so that we
-		// don't get the
-		// wrong image showing up in cases where we request an image, scroll an
-		// adapter back
-		// up so the ImageView gets recycled and show a cached image, then have
-		// the network
-		// loaded version pop in later.
+		// BJD - clear out any previous instances of this ImageView so that we don't get the wrong
+		// image showing up in cases where we request an image, scroll an adapter back up so the 
+		// ImageView gets recycled and show a cached image, then have the network loaded version 
+		// pop in later.
 		ImageToLoadUrl imageToLoadUrl = imageUrlRequest.getImageToLoadUrl();
 		imageViews.remove(imageToLoadUrl.getImageView()); // deluxe
 		OnImageLoadedListener onImageLoadedListener = imageToLoadUrl.getOnImageLoadedListener();
@@ -115,7 +112,7 @@ public class ImageCacheManager {
 		if(isMapped(key)) {
 			bindFromMap(key, imageToLoadUrl.getImageView());
 			if(onImageLoadedListener != null) {
-				onImageLoadedListener.onImageLoaded(imageToLoadUrl.getUrl());
+				onImageLoadedListener.onImageLoaded(imageToLoadUrl);
 			}
 			return false;
 		} else if(isCached(imageUrlRequest)) {
@@ -123,7 +120,7 @@ public class ImageCacheManager {
 			if(bm != null) {
 				imageToLoadUrl.getImageView().setImageBitmap(bm);
 				if(onImageLoadedListener != null) {
-					onImageLoadedListener.onImageLoaded(imageToLoadUrl.getUrl());
+					onImageLoadedListener.onImageLoaded(imageToLoadUrl);
 				}
 				return false;
 			}
@@ -274,9 +271,7 @@ public class ImageCacheManager {
 
 	private void createFile(ImageUrlRequest imageUrlRequest) {
 		try {
-			File newFile = openImageFileByUrl(imageUrlRequest);
-			boolean result = newFile.createNewFile();
-			Log.v(TAG, "File creation result: " + String.valueOf(result));
+			openImageFileByUrl(imageUrlRequest).createNewFile();
 		} catch (IOException e) {
 			Log.e(TAG, "File creation failed: " + e);
 		}
@@ -292,7 +287,6 @@ public class ImageCacheManager {
 			synchronized (imagesToLoad) {
 				for(int j = 0; j < imagesToLoad.size();) {
 					if(imagesToLoad.get(j).getImageToLoadUrl().getImageView() == imageView) {
-						// Log.v(TAG, "Cleaning an queued imageView request");
 						imagesToLoad.remove(j);
 					} else
 						++j;
@@ -306,8 +300,7 @@ public class ImageCacheManager {
 		public void run() {
 			try {
 				while(true) {
-					// thread waits until there are any images to load in the
-					// queue
+					// thread waits until there are any images to load in the queue
 					if(imageQueue.imagesToLoad.size() == 0)
 						synchronized (imageQueue.imagesToLoad) {
 							imageQueue.imagesToLoad.wait();
@@ -399,10 +392,10 @@ public class ImageCacheManager {
 			if(bitmap != null) {
 				imageToLoadUrl.getImageView().setImageBitmap(bitmap);
 				if(imageToLoadUrl.getOnImageLoadedListener() != null) {
-					imageToLoadUrl.getOnImageLoadedListener().onImageLoaded(imageToLoadUrl.getUrl());
+					imageToLoadUrl.getOnImageLoadedListener().onImageLoaded(imageToLoadUrl);
 				}
 			} else if(imageToLoadUrl.getOnImageLoadedListener() != null) {
-				imageToLoadUrl.getOnImageLoadedListener().onLoadFailure(imageToLoadUrl.getUrl());
+				imageToLoadUrl.getOnImageLoadedListener().onLoadFailure(imageToLoadUrl);
 			}
 		}
 	}

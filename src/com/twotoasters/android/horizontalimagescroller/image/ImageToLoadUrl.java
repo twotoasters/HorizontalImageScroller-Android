@@ -2,7 +2,6 @@ package com.twotoasters.android.horizontalimagescroller.image;
 
 import com.google.common.base.Strings;
 import com.twotoasters.android.horizontalimagescroller.io.ImageUrlRequestCacheKey;
-import com.twotoasters.android.horizontalimagescroller.listener.OnImageLoadedListener;
 
 public class ImageToLoadUrl extends ImageToLoad {
 	private String _url;

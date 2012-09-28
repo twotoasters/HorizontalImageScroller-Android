@@ -13,6 +13,6 @@ public class ImageToLoadDrawableResource extends ImageToLoad {
 	}
 
 	public void setDrawableResourceId(int drawableResourceId) {
-		this._drawableResourceId = drawableResourceId;
+		_drawableResourceId = drawableResourceId;
 	}
 }

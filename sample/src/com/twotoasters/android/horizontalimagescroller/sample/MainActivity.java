@@ -5,7 +5,6 @@ import java.util.List;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -154,14 +153,13 @@ public class MainActivity extends Activity {
 			_onImageLoadedListener = new OnImageLoadedListener() {
 				
 				@Override
-				public void onLoadFailure(String imageUrl) {
-					Log.v(TAG, "failed: " + imageUrl);
+				public void onLoadFailure(ImageToLoad imageToLoad) {
 					_imageView.setImageResource(R.drawable.generic_toaster);
 				}
 				
 				@Override
-				public void onImageLoaded(String imageUrl) {
-					Log.v(TAG, "loaded: " + imageUrl);
+				public void onImageLoaded(ImageToLoad imageToLoad) {
+					// no-op
 				}
 			};
 		}
