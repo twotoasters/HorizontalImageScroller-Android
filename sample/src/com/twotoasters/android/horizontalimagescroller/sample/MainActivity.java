@@ -13,7 +13,6 @@ import android.widget.Toast;
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoad;
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadDrawableResource;
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrl;
-import com.twotoasters.android.horizontalimagescroller.image.OnImageLoadedListener;
 import com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScroller;
 import com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScrollerAdapter;
 
@@ -100,6 +99,7 @@ public class MainActivity extends Activity {
 		HorizontalImageScrollerAdapter adapter = new HorizontalImageScrollerAdapter(MainActivity.this, imagesToLoad);
 		adapter.setLoadingImageResourceId(R.drawable.generic_toaster);
 		adapter.setImageSize((int) getResources().getDimension(R.dimen.image_size));
+		adapter.setDefaultImageFailedToLoadResourceId(R.drawable.generic_toaster);
 		scroller.setAdapter(adapter);
 		scroller.setOnItemClickListener(onItemClickListener);
 		_horizontalImageScrollers.add(scroller);
@@ -150,18 +150,6 @@ public class MainActivity extends Activity {
 			super(url);
 			_name = name;
 			_canCacheFile = true;
-			_onImageLoadedListener = new OnImageLoadedListener() {
-				
-				@Override
-				public void onLoadFailure(ImageToLoad imageToLoad) {
-					_imageView.setImageResource(R.drawable.generic_toaster);
-				}
-				
-				@Override
-				public void onImageLoaded(ImageToLoad imageToLoad) {
-					// no-op
-				}
-			};
 		}
 
 		public String getName() {

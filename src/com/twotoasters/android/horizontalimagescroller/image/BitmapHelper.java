@@ -6,6 +6,8 @@ import java.io.InputStream;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
+import android.widget.ImageView;
 
 public class BitmapHelper {
 
@@ -55,5 +57,15 @@ public class BitmapHelper {
 			e.printStackTrace();
 		}
 		return BitmapFactory.decodeStream(stream, null, options);
+	}
+	
+	public static void applySampledResourceToImageView(Resources res, int resId, int reqWidth, int reqHeight, ImageView imageView) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			imageView.setImageDrawable(res.getDrawable(resId));
+		} else {
+			// workaround for old versions of android
+			imageView.setImageBitmap(decodeSampledBitmapFromResource(res, resId, reqWidth, reqHeight));
+		}
+		
 	}
 }

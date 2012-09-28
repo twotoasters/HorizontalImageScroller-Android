@@ -4,7 +4,6 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -35,6 +34,7 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 	protected boolean _showImageFrame = true;
 	protected ImageCacheManager _imageCacheManager;
 	protected OnClickListener _imageOnClickListener;
+	protected int _defaultImageFailedToLoadResourceId;
 	protected List<ImageToLoad> _images;
 
 	public HorizontalImageScrollerAdapter(final Context context, final List<ImageToLoad> images, final int imageSize, final int frameColorResourceId, final int frameOffColorResourceId,
@@ -164,10 +164,16 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 			if (imageToLoad instanceof ImageToLoadUrl) {
 				ImageToLoadUrl imageToLoadUrl = (ImageToLoadUrl) imageToLoad;
 				ImageUrlRequest imageUrlRequest = new ImageUrlRequest(imageToLoadUrl, _imageSize, _imageSize);
-				_setImageViewWithDrawableResourceId(imageView, _loadingImageResourceId);
+				if (imageToLoadUrl.getOnImageLoadFailureResourceId() == 0 && _defaultImageFailedToLoadResourceId != 0) {
+					imageUrlRequest.setImageFailedToLoadResourceId(_defaultImageFailedToLoadResourceId);
+				} else if (imageToLoadUrl.getOnImageLoadFailureResourceId() != 0) {
+					imageUrlRequest.setImageFailedToLoadResourceId(imageToLoadUrl.getOnImageLoadFailureResourceId());
+				}
+				BitmapHelper.applySampledResourceToImageView(_context.getResources(), _loadingImageResourceId, _imageSize, _imageSize, imageView);
 				_imageCacheManager.bindDrawable(imageUrlRequest);
 			} else if (imageToLoad instanceof ImageToLoadDrawableResource) {
-				_setImageViewWithDrawableResourceId(imageView, ((ImageToLoadDrawableResource) imageToLoad).getDrawableResourceId());
+				ImageToLoadDrawableResource imageToLoadDrawableResource = (ImageToLoadDrawableResource) imageToLoad;
+				BitmapHelper.applySampledResourceToImageView(_context.getResources(), imageToLoadDrawableResource.getDrawableResourceId(), _imageSize, _imageSize, imageView);
 			}
 			if(!_showImageFrame) {
 				frame.setBackgroundColor(_transparentColor);
@@ -176,15 +182,6 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 		return view;
 	}
 	
-	protected void _setImageViewWithDrawableResourceId(ImageView imageView, int drawableResourceId) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			imageView.setImageDrawable(_context.getResources().getDrawable(drawableResourceId));
-		} else {
-			// workaround for old versions of android
-			imageView.setImageBitmap(BitmapHelper.decodeSampledBitmapFromResource(_context.getResources(), drawableResourceId, _imageSize, _imageSize));
-		}
-	}
-
 	@Override
 	public ImageToLoad getItem(int position) {
 		return _images.get(position);
@@ -209,6 +206,14 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 				}
 			}
 		}
+	}
+
+	public int getDefaultImageFailedToLoadResourceId() {
+		return _defaultImageFailedToLoadResourceId;
+	}
+
+	public void setDefaultImageFailedToLoadResourceId(int defaultImageFailedToLoadResourceId) {
+		_defaultImageFailedToLoadResourceId = defaultImageFailedToLoadResourceId;
 	}
 	
 	

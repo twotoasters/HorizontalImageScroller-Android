@@ -25,6 +25,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.widget.ImageView;
@@ -394,8 +395,18 @@ public class ImageCacheManager {
 				if(imageToLoadUrl.getOnImageLoadedListener() != null) {
 					imageToLoadUrl.getOnImageLoadedListener().onImageLoaded(imageToLoadUrl);
 				}
-			} else if(imageToLoadUrl.getOnImageLoadedListener() != null) {
-				imageToLoadUrl.getOnImageLoadedListener().onLoadFailure(imageToLoadUrl);
+			} else {
+				if (imageUrlRequest.getImageFailedToLoadResourceId() != 0) {
+					Resources res = imageToLoadUrl.getImageView().getContext().getResources();
+					int imageFailedToLoadResourceId = imageUrlRequest.getImageFailedToLoadResourceId();
+					int width = imageUrlRequest.getReqWidth();
+					int height = imageUrlRequest.getReqHeight();
+					ImageView imageView = imageToLoadUrl.getImageView();
+					BitmapHelper.applySampledResourceToImageView(res, imageFailedToLoadResourceId, width, height, imageView);
+				}
+				if(imageToLoadUrl.getOnImageLoadedListener() != null) {
+					imageToLoadUrl.getOnImageLoadedListener().onLoadFailure(imageToLoadUrl);
+				}
 			}
 		}
 	}

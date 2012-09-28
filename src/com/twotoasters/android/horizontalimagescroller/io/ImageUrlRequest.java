@@ -13,6 +13,7 @@ public class ImageUrlRequest {
 	final private int _reqHeight;
 	private ImageUrlRequestCacheKey _cacheKey;
 	private String _cacheFileName;
+	private int _imageFailedToLoadResourceId;
 	
 	public ImageUrlRequest(ImageToLoadUrl imageToLoadUrl, int reqWidth, int reqHeight) {
 		_imageToLoadUrl = imageToLoadUrl;
@@ -54,5 +55,13 @@ public class ImageUrlRequest {
 			}
 		}
 		return _cacheFileName;
+	}
+
+	public int getImageFailedToLoadResourceId() {
+		return _imageFailedToLoadResourceId;
+	}
+
+	public void setImageFailedToLoadResourceId(int imageFailedToLoadResourceId) {
+		_imageFailedToLoadResourceId = imageFailedToLoadResourceId;
 	}
 }

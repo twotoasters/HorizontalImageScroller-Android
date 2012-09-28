@@ -9,6 +9,7 @@ public class ImageToLoadUrl extends ImageToLoad {
 	private String _password = "";
 	protected boolean _priority = false;
 	protected boolean _canCacheFile = false;
+	protected int _onImageLoadFailureResourceId;
 	protected OnImageLoadedListener _onImageLoadedListener;
 	
 	protected ImageUrlRequestCacheKey _cacheKey;
@@ -82,4 +83,13 @@ public class ImageToLoadUrl extends ImageToLoad {
 	public void setOnImageLoadedListener(OnImageLoadedListener onImageLoadedListener) {
 		_onImageLoadedListener = onImageLoadedListener;
 	}
+
+	public int getOnImageLoadFailureResourceId() {
+		return _onImageLoadFailureResourceId;
+	}
+
+	public void setOnImageLoadFailureResourceId(int onImageLoadFailureResourceId) {
+		_onImageLoadFailureResourceId = onImageLoadFailureResourceId;
+	}
+
 }
