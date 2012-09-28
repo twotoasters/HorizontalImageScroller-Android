@@ -1,15 +1,19 @@
-package com.twotoasters.android.horizontalimagescroller.image;
+package com.twotoasters.android.horizontalimagescroller.io;
 
-public class ImageToLoadUrlCacheKey {
+public class ImageUrlRequestCacheKey {
 
 	final private String _url;
 	final private String _username;
 	final private String _password;
+	final private int _width;
+	final private int _height;
 	
-	public ImageToLoadUrlCacheKey(final String url, final String username, final String password) {
+	public ImageUrlRequestCacheKey(final String url, final String username, final String password, final int width, final int height) {
 		_url = url;
 		_username = username;
 		_password = password;
+		_width = width;
+		_height = height;
 	}
 
 	public String getUrl() {
@@ -22,15 +26,31 @@ public class ImageToLoadUrlCacheKey {
 
 	public String getPassword() {
 		return _password;
+	}	
+	
+	public int getWidth() {
+		return _width;
+	}
+	
+	public int getHeight() {
+		return _height;
+	}
+
+	@Override
+	public String toString() {
+		return "ImageUrlRequestCacheKey [_url=" + _url + ", _username=" + _username + ", _password=" + _password + ", _width=" + _width + ", _height="
+				+ _height + "]";
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + _height;
 		result = prime * result + ((_password == null) ? 0 : _password.hashCode());
 		result = prime * result + ((_url == null) ? 0 : _url.hashCode());
 		result = prime * result + ((_username == null) ? 0 : _username.hashCode());
+		result = prime * result + _width;
 		return result;
 	}
 
@@ -42,7 +62,9 @@ public class ImageToLoadUrlCacheKey {
 			return false;
 		if(getClass() != obj.getClass())
 			return false;
-		ImageToLoadUrlCacheKey other = (ImageToLoadUrlCacheKey)obj;
+		ImageUrlRequestCacheKey other = (ImageUrlRequestCacheKey)obj;
+		if(_height != other._height)
+			return false;
 		if(_password == null) {
 			if(other._password != null)
 				return false;
@@ -58,13 +80,9 @@ public class ImageToLoadUrlCacheKey {
 				return false;
 		} else if(!_username.equals(other._username))
 			return false;
+		if(_width != other._width)
+			return false;
 		return true;
 	}
-
-	@Override
-	public String toString() {
-		return "ImageToLoadUrlCacheKey [_url=" + _url + ", _username=" + _username + ", _password=" + _password + "]";
-	}
-	
 	
 }

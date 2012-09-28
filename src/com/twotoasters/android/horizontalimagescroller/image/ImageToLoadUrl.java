@@ -1,6 +1,7 @@
 package com.twotoasters.android.horizontalimagescroller.image;
 
 import com.google.common.base.Strings;
+import com.twotoasters.android.horizontalimagescroller.io.ImageUrlRequestCacheKey;
 import com.twotoasters.android.horizontalimagescroller.listener.OnImageLoadedListener;
 
 public class ImageToLoadUrl extends ImageToLoad {
@@ -11,7 +12,7 @@ public class ImageToLoadUrl extends ImageToLoad {
 	protected boolean _canCacheFile = false;
 	protected OnImageLoadedListener _onImageLoadedListener;
 	
-	protected ImageToLoadUrlCacheKey _cacheKey;
+	protected ImageUrlRequestCacheKey _cacheKey;
 
 	public ImageToLoadUrl(String url) {
 		_url = url;
@@ -73,13 +74,6 @@ public class ImageToLoadUrl extends ImageToLoad {
 
 	public void setCanCacheFile(boolean canCacheFile) {
 		_canCacheFile = canCacheFile;
-	}
-
-	public ImageToLoadUrlCacheKey toCacheKey() {
-		if (_cacheKey == null) {
-			_cacheKey = new ImageToLoadUrlCacheKey(_url, _username, _password);
-		}
-		return _cacheKey;
 	}
 
 	public OnImageLoadedListener getOnImageLoadedListener() {

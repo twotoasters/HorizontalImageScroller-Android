@@ -32,7 +32,6 @@ import android.widget.ImageView;
 import com.google.common.base.Preconditions;
 import com.twotoasters.android.horizontalimagescroller.image.BitmapHelper;
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrl;
-import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrlCacheKey;
 import com.twotoasters.android.horizontalimagescroller.listener.OnImageLoadedListener;
 
 public class ImageCacheManager {
@@ -46,7 +45,7 @@ public class ImageCacheManager {
 	final MemoryCache memoryCache = new MemoryCache();
 	final ImagesQueue imageQueue = new ImagesQueue();
 	final ImagesLoader[] imageLoaderThreads = new ImagesLoader[N_THREADS];
-	final Map<ImageView, ImageToLoadUrlCacheKey> imageViews = Collections.synchronizedMap(new WeakHashMap<ImageView, ImageToLoadUrlCacheKey>());
+	final Map<ImageView, ImageUrlRequestCacheKey> imageViews = Collections.synchronizedMap(new WeakHashMap<ImageView, ImageUrlRequestCacheKey>());
 
 	Context context;
 
@@ -112,14 +111,14 @@ public class ImageCacheManager {
 		ImageToLoadUrl imageToLoadUrl = imageUrlRequest.getImageToLoadUrl();
 		imageViews.remove(imageToLoadUrl.getImageView()); // deluxe
 		OnImageLoadedListener onImageLoadedListener = imageToLoadUrl.getOnImageLoadedListener();
-		ImageToLoadUrlCacheKey key = imageToLoadUrl.toCacheKey();
+		ImageUrlRequestCacheKey key = imageUrlRequest.getCacheKey();
 		if(isMapped(key)) {
 			bindFromMap(key, imageToLoadUrl.getImageView());
 			if(onImageLoadedListener != null) {
 				onImageLoadedListener.onImageLoaded(imageToLoadUrl.getUrl());
 			}
 			return false;
-		} else if(isCached(key)) {
+		} else if(isCached(imageUrlRequest)) {
 			Bitmap bm = getBitmapFromFileCache(imageUrlRequest);
 			if(bm != null) {
 				imageToLoadUrl.getImageView().setImageBitmap(bm);
@@ -130,35 +129,31 @@ public class ImageCacheManager {
 			}
 		}
 
-		imageViews.put(imageToLoadUrl.getImageView(), key);
+		imageViews.put(imageToLoadUrl.getImageView(), imageUrlRequest.getCacheKey());
 		fetchAndBind(imageUrlRequest);
 		return true;
 	}
 
-	public boolean isMapped(ImageToLoadUrlCacheKey id) {
-		return memoryCache.contains(id);
+	public boolean isMapped(ImageUrlRequestCacheKey key) {
+		return memoryCache.contains(key);
 	}
 
-	private void bindFromMap(ImageToLoadUrlCacheKey id, ImageView imageView) {
-		imageView.setImageBitmap(memoryCache.get(id));
+	private void bindFromMap(ImageUrlRequestCacheKey key, ImageView imageView) {
+		imageView.setImageBitmap(memoryCache.get(key));
 	}
 	
-	public boolean isCached(ImageToLoadUrlCacheKey key) {
+	public boolean isCached(ImageUrlRequest imageUrlRequest) {
 		try {
-			return openImageFileByUrl(key).exists();
+			return openImageFileByUrl(imageUrlRequest).exists();
 		} catch (FileNotFoundException e) {
 			return false;
 		}
 	}
 
-	public File openImageFileByUrl(ImageToLoadUrlCacheKey key) throws FileNotFoundException {
-		return openImageFile(ExternalStorageHelper.UrlToFilename(key));
-	}
-
-	private File openImageFile(String filename) throws FileNotFoundException {
+	public File openImageFileByUrl(ImageUrlRequest imageUrlRequest) throws FileNotFoundException {
+		String filename = ExternalStorageHelper.UrlToFileName(imageUrlRequest);
 		Preconditions.checkState(filename != null);
-
-		File dir = ExternalStorageHelper.getCacheDir(context);
+		File dir = ExternalStorageHelper.openDirectory(context);
 		if(dir != null) {
 			return new File(dir, filename);
 		}
@@ -166,7 +161,7 @@ public class ImageCacheManager {
 	}
 	
 	private Bitmap getBitmapFromCache(ImageUrlRequest imageUrlRequest) {
-		Bitmap bitmap = memoryCache.get(imageUrlRequest.getImageToLoadUrl().toCacheKey());
+		Bitmap bitmap = memoryCache.get(imageUrlRequest.getCacheKey());
 		if(bitmap == null) {
 			bitmap = getBitmapFromFileCache(imageUrlRequest);
 		}
@@ -176,7 +171,7 @@ public class ImageCacheManager {
 	private Bitmap getBitmapFromFileCache(ImageUrlRequest imageUrlRequest) {
 		Bitmap bitmap = null;
 		try {
-			File f = openImageFileByUrl(imageUrlRequest.getImageToLoadUrl().toCacheKey());
+			File f = openImageFileByUrl(imageUrlRequest);
 			bitmap = decodeBitmap(f.getAbsolutePath(), imageUrlRequest.getReqWidth(), imageUrlRequest.getReqHeight());
 		} catch (FileNotFoundException e) {
 		}
@@ -217,7 +212,7 @@ public class ImageCacheManager {
 	}
 
 	public void pleaseCacheDrawable(final ImageUrlRequest imageUrlRequest) {
-		if(!isCached(imageUrlRequest.getImageToLoadUrl().toCacheKey())) {
+		if(!isCached(imageUrlRequest)) {
 			fetchAndCache(imageUrlRequest);
 		}
 	}
@@ -251,16 +246,15 @@ public class ImageCacheManager {
 		Bitmap bitmap = null;
 		try {
 			bitmap = BitmapHelper.decodeSampledBitmapFromSteam(fis, imageUrlRequest.getReqWidth(), imageUrlRequest.getReqHeight());
-			memoryCache.put(imageUrlRequest.getImageToLoadUrl().toCacheKey(), bitmap);
+			memoryCache.put(imageUrlRequest.getCacheKey(), bitmap);
 		} catch (OutOfMemoryError e) {
 			Log.v(TAG, "writeToExternalStorage - Out of memory");
 			System.gc();
 		}
 
 		if(bitmap != null) {
-			String filename = ExternalStorageHelper.UrlToFilename(imageUrlRequest.getImageToLoadUrl().toCacheKey());
-			createFileIfNonexistent(filename);
-			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(openImageFile(filename)), 65535);
+			createFileIfNonexistent(imageUrlRequest);
+			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(openImageFileByUrl(imageUrlRequest)), 65535);
 			bitmap.compress(Bitmap.CompressFormat.PNG, 0, bos);
 			bos.flush();
 			bos.close();
@@ -269,19 +263,21 @@ public class ImageCacheManager {
 		is.close();
 	}
 
-	private void createFileIfNonexistent(String filename) {
+	private void createFileIfNonexistent(ImageUrlRequest imageUrlRequest) {
 		try {
-			if(openImageFile(filename).exists()) {
-				return;
+			if(openImageFileByUrl(imageUrlRequest).exists() == false) {
+				createFile(imageUrlRequest);
 			}
 		} catch (FileNotFoundException e) {
-			createFile(filename);
+			createFile(imageUrlRequest);
 		}
 	}
 
-	private void createFile(String filename) {
+	private void createFile(ImageUrlRequest imageUrlRequest) {
 		try {
-			openImageFile(filename).createNewFile();
+			File newFile = openImageFileByUrl(imageUrlRequest);
+			boolean result = newFile.createNewFile();
+			Log.v(TAG, "File creation result: " + String.valueOf(result));
 		} catch (IOException e) {
 			Log.e(TAG, "File creation failed: " + e);
 		}
@@ -329,7 +325,7 @@ public class ImageCacheManager {
 						}
 
 						Bitmap bitmap = null;
-						if(isCached(imageUrlRequest.getImageToLoadUrl().toCacheKey())) {
+						if(isCached(imageUrlRequest)) {
 							bitmap = getBitmapFromFileCache(imageUrlRequest);
 						}
 
@@ -338,10 +334,10 @@ public class ImageCacheManager {
 						}
 
 						if(bitmap != null) {
-							memoryCache.putIfAbsent(imageUrlRequest.getImageToLoadUrl().toCacheKey(), bitmap);
+							memoryCache.putIfAbsent(imageUrlRequest.getCacheKey(), bitmap);
 						}
-						ImageToLoadUrlCacheKey key = imageViews.get(imageUrlRequest.getImageToLoadUrl().getImageView());
-						if(key != null && key.equals(imageUrlRequest.getImageToLoadUrl().toCacheKey())) {
+						ImageUrlRequestCacheKey key = imageViews.get(imageUrlRequest.getImageToLoadUrl().getImageView());
+						if(key != null && key.equals(imageUrlRequest.getCacheKey())) {
 							ImageViewUpdater updater = new ImageViewUpdater(bitmap, imageUrlRequest);
 							Activity activity = (Activity)imageUrlRequest.getImageToLoadUrl().getImageView().getContext();
 							if(activity != null) {
@@ -367,14 +363,13 @@ public class ImageCacheManager {
 				is = fetch(imageUrlRequest);
 				if(imageUrlRequest.getImageToLoadUrl().isCanCacheFile()) {
 					putBitmapToCaches(is, imageUrlRequest);
-					bitmap = memoryCache.get(imageUrlRequest.getImageToLoadUrl().toCacheKey());
+					bitmap = memoryCache.get(imageUrlRequest.getCacheKey());
 					getBitmapFromCache(imageUrlRequest);
 				} else {
 					bitmap = decodeBitmap(is, imageUrlRequest.getReqWidth(), imageUrlRequest.getReqHeight());
 				}
 			} catch (Exception e) {
-				Log.v(TAG, "fetchDrawable - Exception: " + imageUrlRequest.getImageToLoadUrl().toCacheKey().toString());
-				Log.v(TAG, e.getMessage());
+				Log.v(TAG, "fetchDrawable - Exception: " + imageUrlRequest.getCacheKey().toString());
 				e.printStackTrace();
 			}
 
@@ -418,7 +413,7 @@ public class ImageCacheManager {
 	}
 
 	public void clearFileCache() {
-		File dir = ExternalStorageHelper.getCacheDir(context);
+		File dir = ExternalStorageHelper.getExternalCacheDir(context);
 		File files[] = dir.listFiles();
 		for(File f : files) {
 			f.delete();

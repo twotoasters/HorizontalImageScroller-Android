@@ -3,14 +3,13 @@ package com.twotoasters.android.horizontalimagescroller.io;
 import java.lang.ref.SoftReference;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrlCacheKey;
 
 import android.graphics.Bitmap;
 
 public class MemoryCache {
-	private ConcurrentHashMap<ImageToLoadUrlCacheKey, SoftReference<Bitmap>> cache = new ConcurrentHashMap<ImageToLoadUrlCacheKey, SoftReference<Bitmap>>();
+	private ConcurrentHashMap<ImageUrlRequestCacheKey, SoftReference<Bitmap>> cache = new ConcurrentHashMap<ImageUrlRequestCacheKey, SoftReference<Bitmap>>();
 
-	public boolean contains(ImageToLoadUrlCacheKey key) {
+	public boolean contains(ImageUrlRequestCacheKey key) {
 		try {
 			return get(key) != null;
 		} catch (NullPointerException e) {
@@ -18,7 +17,7 @@ public class MemoryCache {
 		}
 	}
 
-	public Bitmap get(ImageToLoadUrlCacheKey key) {
+	public Bitmap get(ImageUrlRequestCacheKey key) {
 		try {
 			if(!cache.containsKey(key))
 				return null;
@@ -29,7 +28,7 @@ public class MemoryCache {
 		}
 	}
 
-	public void put(ImageToLoadUrlCacheKey key, Bitmap bitmap) {
+	public void put(ImageUrlRequestCacheKey key, Bitmap bitmap) {
 		try {
 			cache.put(key, new SoftReference<Bitmap>(bitmap));
 		} catch (NullPointerException e) {
@@ -40,7 +39,7 @@ public class MemoryCache {
 		cache.clear();
 	}
 
-	public void putIfAbsent(ImageToLoadUrlCacheKey key, Bitmap bitmap) {
+	public void putIfAbsent(ImageUrlRequestCacheKey key, Bitmap bitmap) {
 		try {
 			if(!contains(key)) {
 				put(key, bitmap);
