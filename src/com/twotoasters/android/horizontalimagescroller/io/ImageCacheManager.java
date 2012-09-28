@@ -151,11 +151,10 @@ public class ImageCacheManager {
 	}
 
 	public File openImageFileByUrl(ImageUrlRequest imageUrlRequest) throws FileNotFoundException {
-		String filename = ExternalStorageHelper.UrlToFileName(imageUrlRequest);
-		Preconditions.checkState(filename != null);
+		Preconditions.checkState(imageUrlRequest.getCacheFileName() != null);
 		File dir = ExternalStorageHelper.openDirectory(context);
 		if(dir != null) {
-			return new File(dir, filename);
+			return new File(dir, imageUrlRequest.getCacheFileName());
 		}
 		throw new FileNotFoundException();
 	}

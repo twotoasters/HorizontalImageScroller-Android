@@ -8,10 +8,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
-import org.apache.commons.codec.binary.Hex;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -43,33 +39,6 @@ public class ExternalStorageHelper {
 		}
 
 		return writer.toString();
-	}
-
-//	public static String UrlToDirName(ImageUrlRequest imageUrlRequest) {
-//		String url = imageUrlRequest.getImageToLoadUrl().getUrl();
-//		if (url == null || imageUrlRequest.getReqHeight() < 1 || imageUrlRequest.getReqWidth() < 1 ) return null;
-//		return url.replace('/', '_').replace(':', '_').replace('?', '_');
-//	}
-	
-	public static String UrlToFileName(ImageUrlRequest imageUrlRequest) {
-		String result = null;
-		try {
-			MessageDigest hash = MessageDigest.getInstance("SHA-256");
-			String url = imageUrlRequest.getImageToLoadUrl().getUrl();
-			String username = imageUrlRequest.getImageToLoadUrl().getUsername();
-			String password = imageUrlRequest.getImageToLoadUrl().getPassword();
-			int width = imageUrlRequest.getReqWidth();
-			int height = imageUrlRequest.getReqHeight();
-			String toHash = String.format("url_%1$s_creds_%2$s%3$s_size_%4$dx%5$d", url, username, password, width, height);
-			hash.update(toHash.getBytes());
-			byte[] digest = hash.digest();
-			char[] digestAsCharArray = Hex.encodeHex(digest);
-			result = new String(digestAsCharArray);
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return result;
 	}
 
 	public static File openDirectory(Context context) {
