@@ -16,33 +16,33 @@ Quick Start:
 2. On your Android project, add the HorizontalImageScroller-Android library to your project's list of libraries. (Project -> Properties -> Android -> Library -> Add)
 3. In a layout XML where you'd like to place a HorizontalImageScroller, add a HorizontalImageScroller element like so:
         ```xml
-        <com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScroller 
-            android:id="@+id/my_horizontal_image_scroller"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+<com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScroller 
+    android:id="@+id/my_horizontal_image_scroller"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
         ```
 4. Set up the HorizontalImageScroller with a HorizontalImageScrollerAdapter and give it a list of ImageToLoad objects like so: 
         ```java
-        import com.twotoasters.android.horizontalimagescroller.image.*;
-        import com.twotoasters.android.horizontalimagescroller.widget.*;
-        public class MyActivity extends Activity {
-            public void onCreate(Bundle savedInstanceState) {
-                // do all your activity setup stuff, blah blah
-                super.onCreate(savedInstanceState);
-                setContentView(R.layout.my_activity);
-        
-                // make a list of ImageToLoad objects
-                ArrayList<ImageToLoad> images = new ArrayList<ImageToLoad>();
-                for (int i=0; i<20; i++) {
-                    images.add(new ImageToLoadUrl("http://link.to/some-awesome-image.jpg")); // substitute some pretty picture you can stand to see 20 times in a list
-                    images.add(new ImageToLoadDrawableResource(R.drawable.some_drawable)); // plug in some of your own drawables
-                }
-        
-                // set up the scroller with an adapter populated with the list of ImageToLoad objects
-                HorizontalImageScroller scroller = (HorizontalImageScroller) findViewById(R.id.my_horizontal_image_scroller);
-                scroller.setAdapter(new HorizontalImageScrollerAdapter(images));
-            }
+import com.twotoasters.android.horizontalimagescroller.image.*;
+import com.twotoasters.android.horizontalimagescroller.widget.*;
+public class MyActivity extends Activity {
+    public void onCreate(Bundle savedInstanceState) {
+        // do all your activity setup stuff, blah blah
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.my_activity);
+
+        // make a list of ImageToLoad objects
+        ArrayList<ImageToLoad> images = new ArrayList<ImageToLoad>();
+        for (int i=0; i<20; i++) {
+            images.add(new ImageToLoadUrl("http://link.to/some-awesome-image.jpg")); // substitute some pretty picture you can stand to see 20 times in a list
+            images.add(new ImageToLoadDrawableResource(R.drawable.some_drawable)); // plug in some of your own drawables
         }
+
+        // set up the scroller with an adapter populated with the list of ImageToLoad objects
+        HorizontalImageScroller scroller = (HorizontalImageScroller) findViewById(R.id.my_horizontal_image_scroller);
+        scroller.setAdapter(new HorizontalImageScrollerAdapter(images));
+    }
+}
         ```
 
 Tips:
