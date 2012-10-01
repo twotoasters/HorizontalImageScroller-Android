@@ -1,3 +1,6 @@
+/*
+ * Copied from comment #12 on http://code.google.com/p/android/issues/detail?id=6066
+ */
 package com.twotoasters.android.horizontalimagescroller.io;
 
 
