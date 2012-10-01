@@ -15,7 +15,6 @@ Quick Start:
 1. Add the HorizontalImageScroller-Android library to your Eclipse workspace as a new Android project from existing source.
 2. On your Android project, add the HorizontalImageScroller-Android library to your project's list of libraries. (Project -> Properties -> Android -> Library -> Add)
 3. In a layout XML where you'd like to place a HorizontalImageScroller, add a HorizontalImageScroller element like so:
-
         ```xml
         <com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScroller 
             android:id="@+id/my_horizontal_image_scroller"
@@ -23,7 +22,6 @@ Quick Start:
             android:layout_height="wrap_content" />
         ```
 4. Set up the HorizontalImageScroller with a HorizontalImageScrollerAdapter and give it a list of ImageToLoad objects like so: 
-
         ```java
         import com.twotoasters.android.horizontalimagescroller.image.*;
         import com.twotoasters.android.horizontalimagescroller.widget.*;
