@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -172,10 +173,14 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 			imageToLoad.setImageView(imageView);
 			if (_imageOnClickListener != null) imageView.setOnClickListener(_imageOnClickListener);
 			FrameLayout.LayoutParams params = (FrameLayout.LayoutParams)imageView.getLayoutParams();
-			params.width = _imageSize;
+			params.width = LayoutParams.MATCH_PARENT;
 			params.height = _imageSize;
 			imageView.setLayoutParams(params);
 			View frame = view.findViewById(_getImageFrameIdInLayout());
+			FrameLayout.LayoutParams frameParams = (FrameLayout.LayoutParams) frame.getLayoutParams();
+			frameParams.width = LayoutParams.MATCH_PARENT;
+			frameParams.height = _imageSize;
+			frame.setLayoutParams(frameParams);
 			if (imageToLoad instanceof ImageToLoadUrl) {
 				ImageToLoadUrl imageToLoadUrl = (ImageToLoadUrl) imageToLoad;
 				ImageUrlRequest imageUrlRequest = new ImageUrlRequest(imageToLoadUrl, _imageSize, _imageSize);
