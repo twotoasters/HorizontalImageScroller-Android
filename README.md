@@ -51,3 +51,5 @@ Tips:
 If you need to place the horizontal image scroller in a vertical scroll view, use a ```<com.twotoasters.android.horizontalimagescroller.widget.VerticalScrollView />```.
 
 If you have several HorizontalImageScroller views that are being driven by subsets of a master list of ImageToLoad objects, and you want to set an OnItemClickListener on each of them, you won't be able to get the item by its position in the master list, because its position in the subset list might differ. You can subclass the ImageToLoadUrl and/or ImageToLoadDrawableResource classes with extra properties to hold whatever data you need. In your OnItemClickListener, you can get the item by its position from the adapter, and then refer to the extra properties in the subclass you passed in. See the ToasterToLoadUrl, ToasterToLoadDrawableResource, and ToasterToLoad inner classes/interface in the included sample app's MainActivity.
+
+For the best user experience, don't size your images such that they are wider than the viewport of the scroller.
