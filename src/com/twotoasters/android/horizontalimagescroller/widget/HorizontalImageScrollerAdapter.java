@@ -45,7 +45,7 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 	protected int _imageLayoutResourceId;
 	protected int _loadingImageResourceId;
 	protected LayoutInflater _inflater;
-	protected int _currentImageIndex;
+	protected int _currentImageIndex = -1;
 	protected boolean _highlightActive = true;
 	protected boolean _showImageFrame = true;
 	protected ImageCacheManager _imageCacheManager;
@@ -143,6 +143,14 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 		_currentImageIndex = index;
 		notifyDataSetChanged();
 	}
+	
+	public int getCurrentIndex() {
+		return _currentImageIndex;
+	}
+	
+	public boolean hasCurrentIndex() {
+		return _currentImageIndex >= 0;
+	}
 
 	public void setHighlightActiveImage(boolean highlight) {
 		_highlightActive = highlight;
@@ -181,6 +189,13 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 			frameParams.width = LayoutParams.MATCH_PARENT;
 			frameParams.height = _imageSize;
 			frame.setLayoutParams(frameParams);
+			if (_showImageFrame == false) {
+				frame.setBackgroundColor(_transparentColor);
+			} else if (_highlightActive && _currentImageIndex == position) {
+				frame.setBackgroundColor(_frameColor);
+			} else {
+				frame.setBackgroundColor(_frameOffColor);
+			}
 			if (imageToLoad instanceof ImageToLoadUrl) {
 				ImageToLoadUrl imageToLoadUrl = (ImageToLoadUrl) imageToLoad;
 				ImageUrlRequest imageUrlRequest = new ImageUrlRequest(imageToLoadUrl, _imageSize, _imageSize);

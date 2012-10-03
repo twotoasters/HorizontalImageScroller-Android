@@ -218,12 +218,14 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
      */
     @Override
     public void setSelection(int position) {
-    	if(getChildCount() > 0) {
-    		mScrollPosSet = calculateChildPosition(position);
-    	} else {
-    		mScrollToChild = position;
+    	if (position >= 0) {
+    		if(getChildCount() > 0) {
+        		mScrollPosSet = calculateChildPosition(position);
+        	} else {
+        		mScrollToChild = position;
+        	}
+    		requestLayout();
     	}
-		requestLayout();
     }
 
     private void addAndMeasureChild(final View child, int viewPos) {

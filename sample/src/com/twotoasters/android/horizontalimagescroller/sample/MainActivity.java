@@ -98,7 +98,24 @@ public class MainActivity extends Activity {
 		allToasters.addAll(bizDevToasters);
 		allToasters.addAll(pmToasters);
 		allToasters.addAll(designerToasters);
-		_setupToasterScroller(allToasters, R.id.scroller_all_toasters, onItemClickListener);
+		_setupToasterScroller(allToasters, R.id.scroller_all_toasters, null);
+		HorizontalImageScroller scroller = (HorizontalImageScroller)findViewById(R.id.scroller_all_toasters);
+		HorizontalImageScrollerAdapter adapter = (HorizontalImageScrollerAdapter) scroller.getAdapter();
+		adapter.setShowImageFrame(true);
+		adapter.setHighlightActiveImage(true);
+		adapter.setFrameColor(getResources().getColor(R.color.blue));
+		adapter.setFrameOffColor(getResources().getColor(android.R.color.transparent));
+		scroller.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long itemId) {
+				HorizontalImageScroller scroller = (HorizontalImageScroller)findViewById(R.id.scroller_all_toasters);
+				if (!scroller.hasCurrentImageIndex() || scroller.getCurrentImageIndex() != position) {
+					scroller.setCurrentImageIndex(position);
+				} else {
+					scroller.setCurrentImageIndex(-1);
+				}
+			}
+		});
 
 		if(savedInstanceState != null) {
 			// restore the scroll position of each scroller

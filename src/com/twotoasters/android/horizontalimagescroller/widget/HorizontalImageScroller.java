@@ -34,6 +34,20 @@ public class HorizontalImageScroller extends HorizontalListView {
 			setSelection(index);
 		}
 	}
+	
+	public int getCurrentImageIndex() {
+		if (mAdapter != null) {
+			return ((HorizontalImageScrollerAdapter)mAdapter).getCurrentIndex();
+		}
+		return -1;
+	}
+	
+	public boolean hasCurrentImageIndex() {
+		if (mAdapter != null) {
+			return ((HorizontalImageScrollerAdapter)mAdapter).hasCurrentIndex();
+		}
+		return false;
+	}
 
 	public void setImageSize(int size) {
 		if(mAdapter != null) {
