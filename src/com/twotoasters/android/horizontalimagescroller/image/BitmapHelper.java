@@ -75,12 +75,13 @@ public class BitmapHelper {
 	}
 	
 	public static void applySampledResourceToImageView(Resources res, int resId, int reqWidth, int reqHeight, ImageView imageView) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			imageView.setImageDrawable(res.getDrawable(resId));
-		} else {
-			// workaround for old versions of android
-			imageView.setImageBitmap(decodeSampledBitmapFromResource(res, resId, reqWidth, reqHeight));
+		if (resId != 0) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+				imageView.setImageDrawable(res.getDrawable(resId));
+			} else {
+				// workaround for old versions of android
+				imageView.setImageBitmap(decodeSampledBitmapFromResource(res, resId, reqWidth, reqHeight));
+			}
 		}
-		
 	}
 }
