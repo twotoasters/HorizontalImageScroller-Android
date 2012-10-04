@@ -25,7 +25,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.BaseAdapter;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.twotoasters.android.horizontalimagescroller.R;
@@ -52,6 +51,8 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 	protected OnClickListener _imageOnClickListener;
 	protected int _defaultImageFailedToLoadResourceId;
 	protected List<ImageToLoad> _images;
+	protected int _imageIdInLayout;
+	protected int _innerWrapperIdInLayout;
 
 	public HorizontalImageScrollerAdapter(final Context context, final List<ImageToLoad> images, final int imageSize, final int frameColorResourceId, final int frameOffColorResourceId,
 			final int transparentColorResourceId, final int imageLayoutResourceId, final int loadingImageResourceId) {
@@ -72,13 +73,19 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 		_context = context;
 		_inflater = LayoutInflater.from(context);
 		_images = images;
-		Resources res = context.getResources();
+		_setDefaultValues();
+	}
+	
+	private void _setDefaultValues() {
+		Resources res = _context.getResources();
 		_imageSize = (int) res.getDimension(R.dimen.default_image_size);
 		_frameColor = res.getColor(R.color.default_frame_color);
 		_frameOffColor = res.getColor(R.color.default_frame_off_color);
 		_transparentColor = res.getColor(R.color.default_transparent_color);
 		_imageLayoutResourceId = R.layout.horizontal_image_scroller_item;
-		_imageCacheManager = ImageCacheManager.getInstance(context);
+		_imageCacheManager = ImageCacheManager.getInstance(_context);
+		_imageIdInLayout = R.id.image;
+		_innerWrapperIdInLayout = R.id.image_frame;
 	}
 
 	public int getImageSize() {
@@ -160,14 +167,6 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 		_showImageFrame = b;
 	}
 
-	protected int _getImageIdInLayout() {
-		return R.id.image;
-	}
-
-	protected int _getImageFrameIdInLayout() {
-		return R.id.image_frame;
-	}
-
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view = convertView;
@@ -176,26 +175,12 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 				view = _inflater.inflate(_imageLayoutResourceId, null);
 			}
 			ImageToLoad imageToLoad = getItem(position);
-			ImageView imageView = (ImageView)view.findViewById(_getImageIdInLayout());
+			ImageView imageView = (ImageView)view.findViewById(_imageIdInLayout);
 			_imageCacheManager.unbindImage(imageView);
 			imageToLoad.setImageView(imageView);
 			if (_imageOnClickListener != null) imageView.setOnClickListener(_imageOnClickListener);
-			FrameLayout.LayoutParams params = (FrameLayout.LayoutParams)imageView.getLayoutParams();
-			params.width = LayoutParams.MATCH_PARENT;
-			params.height = _imageSize;
-			imageView.setLayoutParams(params);
-			View frame = view.findViewById(_getImageFrameIdInLayout());
-			FrameLayout.LayoutParams frameParams = (FrameLayout.LayoutParams) frame.getLayoutParams();
-			frameParams.width = LayoutParams.MATCH_PARENT;
-			frameParams.height = _imageSize;
-			frame.setLayoutParams(frameParams);
-			if (_showImageFrame == false) {
-				frame.setBackgroundColor(_transparentColor);
-			} else if (_highlightActive && _currentImageIndex == position) {
-				frame.setBackgroundColor(_frameColor);
-			} else {
-				frame.setBackgroundColor(_frameOffColor);
-			}
+			_setupImageViewLayout(view, imageToLoad, position);
+			_setupInnerWrapper(view, imageToLoad, position);
 			if (imageToLoad instanceof ImageToLoadUrl) {
 				ImageToLoadUrl imageToLoadUrl = (ImageToLoadUrl) imageToLoad;
 				ImageUrlRequest imageUrlRequest = new ImageUrlRequest(imageToLoadUrl, _imageSize, _imageSize);
@@ -210,11 +195,31 @@ public class HorizontalImageScrollerAdapter extends BaseAdapter {
 				ImageToLoadDrawableResource imageToLoadDrawableResource = (ImageToLoadDrawableResource) imageToLoad;
 				BitmapHelper.applySampledResourceToImageView(_context.getResources(), imageToLoadDrawableResource.getDrawableResourceId(), _imageSize, _imageSize, imageView);
 			}
-			if(!_showImageFrame) {
-				frame.setBackgroundColor(_transparentColor);
-			}
 		}
 		return view;
+	}
+	
+	protected void _setupImageViewLayout(View view, ImageToLoad imageToLoad, int position) {
+		ImageView imageView = (ImageView)view.findViewById(_imageIdInLayout);
+		LayoutParams params = imageView.getLayoutParams();
+		params.width = LayoutParams.MATCH_PARENT;
+		params.height = _imageSize;
+		imageView.setLayoutParams(params);
+	}
+	
+	protected void _setupInnerWrapper(View view, ImageToLoad imageToLoad, int position) {
+		View frame = view.findViewById(_innerWrapperIdInLayout);
+		LayoutParams frameParams = frame.getLayoutParams();
+		frameParams.width = LayoutParams.WRAP_CONTENT;
+		frameParams.height = LayoutParams.WRAP_CONTENT;
+		frame.setLayoutParams(frameParams);
+		if (_showImageFrame == false) {
+			frame.setBackgroundColor(_transparentColor);
+		} else if (_highlightActive && _currentImageIndex == position) {
+			frame.setBackgroundColor(_frameColor);
+		} else {
+			frame.setBackgroundColor(_frameOffColor);
+		}
 	}
 	
 	@Override

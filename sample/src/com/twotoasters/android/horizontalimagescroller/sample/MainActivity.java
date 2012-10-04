@@ -19,10 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoad;
@@ -98,13 +101,10 @@ public class MainActivity extends Activity {
 		allToasters.addAll(bizDevToasters);
 		allToasters.addAll(pmToasters);
 		allToasters.addAll(designerToasters);
-		_setupToasterScroller(allToasters, R.id.scroller_all_toasters, null);
 		HorizontalImageScroller scroller = (HorizontalImageScroller)findViewById(R.id.scroller_all_toasters);
-		HorizontalImageScrollerAdapter adapter = (HorizontalImageScrollerAdapter) scroller.getAdapter();
-		adapter.setShowImageFrame(true);
-		adapter.setHighlightActiveImage(true);
-		adapter.setFrameColor(getResources().getColor(R.color.blue));
-		adapter.setFrameOffColor(getResources().getColor(android.R.color.transparent));
+		HorizontalImageScrollerAdapter adapter = new AllToastersHorizontalImageScrollerAdapter(this, allToasters);
+		scroller.setAdapter(adapter);
+		
 		scroller.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long itemId) {
@@ -213,5 +213,30 @@ public class MainActivity extends Activity {
 			scrollXes[_horizontalImageScrollers.indexOf(scroller)] = scroller.getCurrentX();
 		}
 		outState.putIntArray(KEY_SCROLL_XES, scrollXes);
+	}
+	
+	private class AllToastersHorizontalImageScrollerAdapter extends HorizontalImageScrollerAdapter {
+
+		public AllToastersHorizontalImageScrollerAdapter(Context context, List<ImageToLoad> images) {
+			super(context, images);
+			_showImageFrame = true;
+			_highlightActive = true;
+			_imageLayoutResourceId = R.layout.alltoasters_horizontal_image_scroller_item;
+			_imageSize = (int) getResources().getDimension(R.dimen.image_size);
+			_loadingImageResourceId = R.drawable.generic_toaster;
+			_defaultImageFailedToLoadResourceId = R.drawable.generic_toaster;
+			_frameColor = getResources().getColor(R.color.light_grey);
+			_frameOffColor = getResources().getColor(android.R.color.transparent);
+			_imageIdInLayout = R.id.image;
+			_innerWrapperIdInLayout = R.id.inner_wrapper;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View view = super.getView(position, convertView, parent);
+			TextView textView = (TextView) view.findViewById(R.id.name);
+			textView.setText(((ToasterToLoad) getItem(position)).getName()); 
+			return view;
+		}
 	}
 }
