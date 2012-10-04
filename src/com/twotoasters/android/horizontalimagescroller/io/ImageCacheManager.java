@@ -42,6 +42,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -132,7 +133,7 @@ public class ImageCacheManager {
 			}
 			return false;
 		} else if(isCached(imageUrlRequest)) {
-			Bitmap bm = getBitmapFromFileCache(imageUrlRequest);
+			Bitmap bm = getBitmapFromCache(imageUrlRequest);
 			if(bm != null) {
 				imageToLoadUrl.getImageView().setImageBitmap(bm);
 				if(onImageLoadedListener != null) {
@@ -184,20 +185,24 @@ public class ImageCacheManager {
 		Bitmap bitmap = null;
 		try {
 			File f = openImageFileByUrl(imageUrlRequest);
-			bitmap = decodeBitmap(f.getAbsolutePath(), imageUrlRequest.getReqWidth(), imageUrlRequest.getReqHeight());
+			bitmap = decodeBitmap(f.getAbsolutePath(), imageUrlRequest.getReqWidth(), imageUrlRequest.getReqHeight(), true);
 		} catch (FileNotFoundException e) {
 		}
 		return bitmap;
 	}
 
-	private Bitmap decodeBitmap(String filePath, int reqWidth, int reqHeight) throws FileNotFoundException {
-		return decodeBitmap(new FileInputStream(filePath), reqWidth, reqHeight);
+	private Bitmap decodeBitmap(String filePath, int reqWidth, int reqHeight, boolean resampleIsUnnecessary) throws FileNotFoundException {
+		return decodeBitmap(new FileInputStream(filePath), reqWidth, reqHeight, resampleIsUnnecessary);
 	}
 
-	private Bitmap decodeBitmap(InputStream is, int reqWidth, int reqHeight) {
+	private Bitmap decodeBitmap(InputStream is, int reqWidth, int reqHeight, boolean resampleIsUnnecessary) {
 		Bitmap bitmap = null;
 		try {
-			bitmap = BitmapHelper.decodeSampledBitmapFromSteam(new FlushedInputStream(is), reqWidth, reqHeight); 
+			if (resampleIsUnnecessary) {
+				bitmap = BitmapFactory.decodeStream(is);
+			} else {
+				bitmap = BitmapHelper.decodeSampledBitmapFromSteam(new FlushedInputStream(is), reqWidth, reqHeight);
+			}
 		} catch (OutOfMemoryError e) {
 			Log.w(TAG, "Out of memory while decoding bitmap stream");
 			System.gc();
@@ -374,7 +379,7 @@ public class ImageCacheManager {
 					bitmap = memoryCache.get(imageUrlRequest.getCacheKey());
 					getBitmapFromCache(imageUrlRequest);
 				} else {
-					bitmap = decodeBitmap(is, imageUrlRequest.getReqWidth(), imageUrlRequest.getReqHeight());
+					bitmap = decodeBitmap(is, imageUrlRequest.getReqWidth(), imageUrlRequest.getReqHeight(), true);
 				}
 			} catch (Exception e) {
 				Log.v(TAG, "fetchDrawable - Exception: " + imageUrlRequest.getCacheKey().toString());
