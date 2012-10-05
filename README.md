@@ -55,6 +55,11 @@ If you have several HorizontalImageScroller views that are being driven by subse
 
 For the best user experience, don't size your images such that they are wider than the viewport of the scroller.
 
+If you are going to use the ImageToLoadUrl class, add the following uses-permission to your ```AndroidManifest.xml```
+```xml
+<uses-permission android:name="android.permission.INTERNET"/>
+```
+
 If you want to enable caching (drastically reduces load times at the expense of some disk space), add the following uses-permission to your ```AndroidManifest.xml```
 ```xml
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
