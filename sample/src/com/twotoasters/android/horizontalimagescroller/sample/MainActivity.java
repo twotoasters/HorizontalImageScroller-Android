@@ -128,7 +128,8 @@ public class MainActivity extends Activity {
 		 *  of the clicked item
 		 */
 		scroller.setOnItemClickListener(new SelectionToggleOnItemClickListener());
-
+		_horizontalImageScrollers.add(scroller);
+		
 		/*
 		 * if onCreate() has been called with a non-null savedInstanceState, then we're recreating
 		 * the activity following a device configuration change (such as the user rotated the
