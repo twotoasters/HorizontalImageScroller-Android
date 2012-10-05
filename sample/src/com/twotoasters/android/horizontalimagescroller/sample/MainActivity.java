@@ -33,6 +33,7 @@ import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadDrawable
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrl;
 import com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScroller;
 import com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScrollerAdapter;
+import com.twotoasters.android.horizontalimagescroller.widget.SelectionToggleOnItemClickListener;
 
 public class MainActivity extends Activity {
 
@@ -104,18 +105,7 @@ public class MainActivity extends Activity {
 		HorizontalImageScroller scroller = (HorizontalImageScroller)findViewById(R.id.scroller_all_toasters);
 		HorizontalImageScrollerAdapter adapter = new AllToastersHorizontalImageScrollerAdapter(this, allToasters);
 		scroller.setAdapter(adapter);
-		
-		scroller.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long itemId) {
-				HorizontalImageScroller scroller = (HorizontalImageScroller)findViewById(R.id.scroller_all_toasters);
-				if (!scroller.hasCurrentImageIndex() || scroller.getCurrentImageIndex() != position) {
-					scroller.setCurrentImageIndex(position);
-				} else {
-					scroller.setCurrentImageIndex(-1);
-				}
-			}
-		});
+		scroller.setOnItemClickListener(new SelectionToggleOnItemClickListener());
 
 		if(savedInstanceState != null) {
 			// restore the scroll position of each scroller
