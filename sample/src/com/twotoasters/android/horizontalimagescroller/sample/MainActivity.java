@@ -33,22 +33,40 @@ import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadDrawable
 import com.twotoasters.android.horizontalimagescroller.image.ImageToLoadUrl;
 import com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScroller;
 import com.twotoasters.android.horizontalimagescroller.widget.HorizontalImageScrollerAdapter;
+import com.twotoasters.android.horizontalimagescroller.widget.SelectionToggleOnItemClickListener;
 
 public class MainActivity extends Activity {
 
+	/*
+	 *  there are multiple HorizontalImageScroller widgets in this activity, and there are some
+	 *  cases where we want to perform the same operations on all of them. if your activity only
+	 *  has one instance, keeping a reference is probably not necessary (but may be convenient)
+	 */
 	private List<HorizontalImageScroller> _horizontalImageScrollers;
+	
+	// String key for persisting the scrollX position in Bundle objects 
 	private static final String KEY_SCROLL_XES = "scrollXes";
-	private static final String TAG = MainActivity.class.getSimpleName();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
+		
 		_horizontalImageScrollers = new ArrayList<HorizontalImageScroller>();
-
+		
+		/*
+		 * this is a convenience to map our ImageToLoad objects by name of toaster, making it easy
+		 * to reference toasters by name. your app probably doesn't need to use this pattern,
+		 * but since this app is "programmer art" with no formal design process, this lessened the
+		 * impact on my quality of life when changing the design.
+		 */
 		ToasterImageToLoadHolder toasters = new ToasterImageToLoadHolder();
-
+		
+		/*
+		 * demonstrate onItemClick handling. Use the adapter's getItem() method to find the backing
+		 * object for the clicked item. Tap a toaster where this listener is set to see a Toast
+		 * with the name of the Toaster.
+		 */
 		OnItemClickListener onItemClickListener = new OnItemClickListener() {
 
 			@Override
@@ -64,7 +82,7 @@ public class MainActivity extends Activity {
 		androidToasters.add(toasters.CARLTON);
 		androidToasters.add(toasters.JEREMY);
 		androidToasters.add(toasters.PAT);
-		_setupToasterScroller(androidToasters, R.id.scroller_androids, onItemClickListener);
+		_setupToasterScroller(androidToasters, R.id.scroller_androids, onItemClickListener); // more on this method later
 
 		// ios toasters
 		ArrayList<ImageToLoad> iosToasters = new ArrayList<ImageToLoad>();
@@ -74,7 +92,7 @@ public class MainActivity extends Activity {
 		iosToasters.add(toasters.KEVIN);
 		iosToasters.add(toasters.JOSH);
 		iosToasters.add(toasters.SCOTT);
-		_setupToasterScroller(iosToasters, R.id.scroller_ioesses, onItemClickListener);
+		_setupToasterScroller(iosToasters, R.id.scroller_ioesses, onItemClickListener); // isn't it nice when code is reusable?
 
 		// biz dev toasters
 		ArrayList<ImageToLoad> bizDevToasters = new ArrayList<ImageToLoad>();
@@ -102,21 +120,22 @@ public class MainActivity extends Activity {
 		allToasters.addAll(pmToasters);
 		allToasters.addAll(designerToasters);
 		HorizontalImageScroller scroller = (HorizontalImageScroller)findViewById(R.id.scroller_all_toasters);
+		// AllToasters...Adapter provides some additional functionality... keep reading
 		HorizontalImageScrollerAdapter adapter = new AllToastersHorizontalImageScrollerAdapter(this, allToasters);
 		scroller.setAdapter(adapter);
-		
-		scroller.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long itemId) {
-				HorizontalImageScroller scroller = (HorizontalImageScroller)findViewById(R.id.scroller_all_toasters);
-				if (!scroller.hasCurrentImageIndex() || scroller.getCurrentImageIndex() != position) {
-					scroller.setCurrentImageIndex(position);
-				} else {
-					scroller.setCurrentImageIndex(-1);
-				}
-			}
-		});
+		/*
+		 *  use our handy dandy SelectionToggleOnItemClickListener. It toggles the selection state
+		 *  of the clicked item
+		 */
+		scroller.setOnItemClickListener(new SelectionToggleOnItemClickListener());
 
+		/*
+		 * if onCreate() has been called with a non-null savedInstanceState, then we're recreating
+		 * the activity following a device configuration change (such as the user rotated the
+		 * device). here we restore the scroll position of each HorizontalImageScroller widget.
+		 * if you don't mind losing the scroll position, you don't *have* to do this, but don't
+		 * blame me if your users rage-quit over it.
+		 */
 		if(savedInstanceState != null) {
 			// restore the scroll position of each scroller
 			int[] scrollXes = savedInstanceState.getIntArray(KEY_SCROLL_XES);
@@ -125,7 +144,11 @@ public class MainActivity extends Activity {
 			}
 		}
 	}
-
+	
+	/*
+	 * since most of the toaster scrollers have the exact same behavior and appearance (except
+	 * for the toasters on display), here we make the setup process reusable.
+	 */
 	private void _setupToasterScroller(ArrayList<ImageToLoad> imagesToLoad, int scrollerResourceId, OnItemClickListener onItemClickListener) {
 		HorizontalImageScroller scroller = (HorizontalImageScroller)findViewById(scrollerResourceId);
 		HorizontalImageScrollerAdapter adapter = new HorizontalImageScrollerAdapter(MainActivity.this, imagesToLoad);
@@ -136,7 +159,7 @@ public class MainActivity extends Activity {
 		scroller.setOnItemClickListener(onItemClickListener);
 		_horizontalImageScrollers.add(scroller);
 	}
-
+	
 	private String getGravatarUrl(String hash) {
 		StringBuilder builder = new StringBuilder("http://www.gravatar.com/avatar/");
 		builder.append(hash)
@@ -149,9 +172,24 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
+		/*
+		 * when your activity pauses, your activity will release its layout, and in turn the
+		 * ImageView objects. however, the HorizontalImageScrollerAdapter may have passed 
+		 * references to some of those objects into the ImageCacheManager, which might still
+		 * be hanging onto them. if you don't unbind them, they won't be garbage collected.
+		 * if you only have one HorizontalImageScroller (and no need for a list), you can
+		 * get its adapter, and call its unbindImageViews() directly.
+		 * HorizontalImageScroller.unbindImageViews(List<HorizontalImageScroller> scrollers) is
+		 * just for convenience if you have multiple scrollers.  
+		 */
 		HorizontalImageScroller.unbindImageViews(_horizontalImageScrollers);
 	}
-
+	
+	/*
+	 * map the ToasterToLoad* objects to the name of the toaster for easy reference. again, you
+	 * probably don't need to use this pattern in your app. i figure multiple hard-coded lists 
+	 * sharing the same images is a bit of a contrived use-case.
+	 */
 	private class ToasterImageToLoadHolder {
 		ImageToLoad ADIT = new ToasterToLoadDrawableResource(R.drawable.adit, "Adit Shukla");
 		ImageToLoad BRIAN = new ToasterToLoadDrawableResource(R.drawable.brian, "Brian Dupuis");
@@ -170,17 +208,32 @@ public class MainActivity extends Activity {
 		ImageToLoad KAYLA = new ToasterToLoadUrl(getGravatarUrl("20580e80650dcf07167e9c8779371e16"), "Kayla Bourgeois");
 		ImageToLoad DUSTIN = new ToasterToLoadUrl(getGravatarUrl("266f809f5baf5421098c93e73520ad42"), "Dustin Rhodes");
 	}
-
+	
+	/*
+	 * make it easy to get the toaster's name on the Toaster...Url/Drawable subclasses 
+	 */
 	private interface ToasterToLoad {
 		public String getName();
 	}
-
+	
+	/*
+	 * extend the ImageToLoadUrl class with the name of a toaster 
+	 */
 	private class ToasterToLoadUrl extends ImageToLoadUrl implements ToasterToLoad {
 		private String _name;
 
 		public ToasterToLoadUrl(String url, String name) {
 			super(url);
 			_name = name;
+			/*
+			 *  ImageToLoadUrl objects won't have their images cached by default. in this case,
+			 *  we always want ToasterToLoadUrl to have their images cached, so we set that here.
+			 *  there is also a public setter you can use if you want more nuanced control in your
+			 *  app. one more piece is required for this to work, though. in your manifest, make 
+			 *  sure you have the following uses-permission tags: 
+			 *  INTERNET
+			 *  WRITE_EXTERNAL_STORAGE 
+			 */
 			_canCacheFile = true;
 		}
 
@@ -188,7 +241,10 @@ public class MainActivity extends Activity {
 			return _name;
 		}
 	}
-
+	
+	/*
+	 * extend the ImageToLoadDrawableResource with the name of a toaster 
+	 */
 	private class ToasterToLoadDrawableResource extends ImageToLoadDrawableResource implements ToasterToLoad {
 		private String _name;
 
@@ -210,32 +266,50 @@ public class MainActivity extends Activity {
 		// (so they can be restored after device configuration change)
 		int[] scrollXes = new int[_horizontalImageScrollers.size()];
 		for(HorizontalImageScroller scroller : _horizontalImageScrollers) {
+			// deters the wrath of your users 
 			scrollXes[_horizontalImageScrollers.indexOf(scroller)] = scroller.getCurrentX();
 		}
 		outState.putIntArray(KEY_SCROLL_XES, scrollXes);
 	}
 	
+	/*
+	 * custom adapter with a custom layout that shows the name of the toaster as a caption, and
+	 * provides selection state
+	 */
 	private class AllToastersHorizontalImageScrollerAdapter extends HorizontalImageScrollerAdapter {
 
 		public AllToastersHorizontalImageScrollerAdapter(Context context, List<ImageToLoad> images) {
 			super(context, images);
 			_showImageFrame = true;
 			_highlightActive = true;
+			// substitute our custom layout
 			_imageLayoutResourceId = R.layout.alltoasters_horizontal_image_scroller_item;
 			_imageSize = (int) getResources().getDimension(R.dimen.image_size);
 			_loadingImageResourceId = R.drawable.generic_toaster;
 			_defaultImageFailedToLoadResourceId = R.drawable.generic_toaster;
 			_frameColor = getResources().getColor(R.color.light_grey);
 			_frameOffColor = getResources().getColor(android.R.color.transparent);
+			
+			/*
+			 * if you specify a custom layout, you MUST also specify the _imageIdInLayout and
+			 *  _innerWrapperIdInLayout. since we're using a custom layout, keep in mind that 
+			 * although the id of the image appears to be the same as the one in the stock layout
+			 * at first glance, the sample app is a different "project", so its R class is a 
+			 * different package, and the underlying integer id will almost surely differ. 
+			 */
 			_imageIdInLayout = R.id.image;
 			_innerWrapperIdInLayout = R.id.inner_wrapper;
 		}
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
+			// the parent getView() method does most of the hard work 
 			View view = super.getView(position, convertView, parent);
+			
+			// set the caption to the name of the toaster
 			TextView textView = (TextView) view.findViewById(R.id.name);
 			textView.setText(((ToasterToLoad) getItem(position)).getName()); 
+			
 			return view;
 		}
 	}
