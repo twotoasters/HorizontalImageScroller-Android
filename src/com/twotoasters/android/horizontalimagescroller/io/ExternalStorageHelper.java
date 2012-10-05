@@ -28,12 +28,16 @@ public class ExternalStorageHelper {
 
 	public static File openDirectory(Context context) {
 		File storageDir = getExternalCacheDir(context);
-		if (isExternalStorageMounted()) {
-			if (storageDir != null && !storageDir.exists()) {
-				storageDir.mkdirs();
+		File directory = null;
+		if (storageDir != null) {
+			// to make sure our files don't collide with yours
+			directory = new File(storageDir, ExternalStorageHelper.class.getPackage().getName());
+			
+			if (directory != null && isExternalStorageMounted() && !directory.exists()) {
+				directory.mkdirs();
 			}
 		}
-		return storageDir;
+		return directory;
 	}
 
 	private static boolean isExternalStorageMounted() {
