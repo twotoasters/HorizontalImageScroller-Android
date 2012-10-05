@@ -57,9 +57,8 @@ public class MainActivity extends Activity {
 		/*
 		 * this is a convenience to map our ImageToLoad objects by name of toaster, making it easy
 		 * to reference toasters by name. your app probably doesn't need to use this pattern,
-		 * but since this app is "programmer art" with no format design process, this object made
-		 * it easy to change the design direction without too detracting too much from my quality
-		 * of life.
+		 * but since this app is "programmer art" with no formal design process, this lessened the
+		 * impact on my quality of life when changing the design.
 		 */
 		ToasterImageToLoadHolder toasters = new ToasterImageToLoadHolder();
 		
