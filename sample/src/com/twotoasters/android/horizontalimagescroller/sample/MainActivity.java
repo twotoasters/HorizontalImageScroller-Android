@@ -187,8 +187,8 @@ public class MainActivity extends Activity {
 	
 	/*
 	 * map the ToasterToLoad* objects to the name of the toaster for easy reference. again, you
-	 * probably don't need to use this pattern in your app. i figure a hard-coded multiple
-	 * hard-coded lists sharing the same images is a bit of a contrived use-case.
+	 * probably don't need to use this pattern in your app. i figure multiple hard-coded lists 
+	 * sharing the same images is a bit of a contrived use-case.
 	 */
 	private class ToasterImageToLoadHolder {
 		ImageToLoad ADIT = new ToasterToLoadDrawableResource(R.drawable.adit, "Adit Shukla");
