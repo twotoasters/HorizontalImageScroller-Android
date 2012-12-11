@@ -78,7 +78,7 @@ public class MainActivity extends Activity {
 
 		// android toasters
 		ArrayList<ImageToLoad> androidToasters = new ArrayList<ImageToLoad>();
-		androidToasters.add(toasters.BRIAN);
+		androidToasters.add(toasters.FRED);
 		androidToasters.add(toasters.CARLTON);
 		androidToasters.add(toasters.JEREMY);
 		androidToasters.add(toasters.PAT);
@@ -193,7 +193,7 @@ public class MainActivity extends Activity {
 	 */
 	private class ToasterImageToLoadHolder {
 		ImageToLoad ADIT = new ToasterToLoadDrawableResource(R.drawable.adit, "Adit Shukla");
-		ImageToLoad BRIAN = new ToasterToLoadDrawableResource(R.drawable.brian, "Brian Dupuis");
+		ImageToLoad FRED = new ToasterToLoadUrl(getGravatarUrl("7305841a1b14e179a54a7fd74b808297"), "Fred Medlin");
 		ImageToLoad CARLTON = new ToasterToLoadDrawableResource(R.drawable.carlton, "Carlton Whitehead");
 		ImageToLoad JEREMY = new ToasterToLoadDrawableResource(R.drawable.jeremy, "Jeremy Ellison");
 		ImageToLoad PAT = new ToasterToLoadDrawableResource(R.drawable.pat, "Pat Fives");
